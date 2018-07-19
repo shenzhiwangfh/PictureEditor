@@ -1,9 +1,9 @@
 package com.nq.pictureeditor;
 
-import android.graphics.Rect;
+import android.graphics.RectF;
 
 public class ClipRecord extends Record {
 
-    public Rect rect;
-    public float ratio;
+    public RectF pictureRect;
+    public RectF clipPictureRect;
 }
