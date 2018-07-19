@@ -705,6 +705,11 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     }
 
     private void addRecord() {
+        if(mIndex < (mRecords.size() - 1)) {
+            for(int i = (mIndex + 1); i < mRecords.size(); i++) {
+                mRecords.remove(i);
+            }
+        }
         ClipRecord record = new ClipRecord();
         record.pictureRect = new RectF(pictureRect);
         record.clipPictureRect = new RectF(clipPictureRect);
@@ -721,11 +726,31 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     }
 
     public void goBack() {
-        //postInvalidate();
+        Record record = mRecords.get(mIndex - 1);
+        if(record instanceof ClipRecord) {
+            ClipRecord clipRecord = (ClipRecord) record;
+            pictureRect.set(clipRecord.pictureRect);
+            clipPictureRect.set(clipRecord.clipPictureRect);
+            setClipBitmapRect();
+            setClipIconRect(0, 0);
+            mIndex--;
+            invalidateBtn();
+            postInvalidate();
+        }
     }
 
     public void goForward() {
-
+        Record record = mRecords.get(mIndex + 1);
+        if(record instanceof ClipRecord) {
+            ClipRecord clipRecord = (ClipRecord) record;
+            pictureRect.set(clipRecord.pictureRect);
+            clipPictureRect.set(clipRecord.clipPictureRect);
+            setClipBitmapRect();
+            setClipIconRect(0, 0);
+            mIndex++;
+            invalidateBtn();
+            postInvalidate();
+        }
     }
 
     public void goSave() {
