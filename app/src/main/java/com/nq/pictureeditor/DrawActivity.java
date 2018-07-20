@@ -18,6 +18,8 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
     private ImageView mSave;
     private ImageView mBack;
     private ImageView mForward;
+    private ImageView mClip;
+    private ImageView mPen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +30,11 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
         Bitmap mBitmap = bitmapDrawable.getBitmap();
 
         mDrawView = findViewById(R.id.picture);
-        mDrawView.init(mBitmap);
-        mDrawView.setFinishDraw(this);
-
         mSave = findViewById(R.id.save);
         mBack = findViewById(R.id.back);
         mForward = findViewById(R.id.forward);
+        mClip = findViewById(R.id.clip);
+        mPen = findViewById(R.id.pen);
 
         mBack.setEnabled(false);
         mForward.setEnabled(false);
@@ -41,6 +42,12 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
         mSave.setOnClickListener(this);
         mBack.setOnClickListener(this);
         mForward.setOnClickListener(this);
+        mClip.setOnClickListener(this);
+        mPen.setOnClickListener(this);
+
+        mDrawView.init(mBitmap);
+        mDrawView.setFinishDraw(this);
+        setMode(0x10);
 
         requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
     }
@@ -81,6 +88,27 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
                 break;
             case R.id.forward:
                 mDrawView.goForward();
+                break;
+            case R.id.clip:
+                setMode(0x10);
+                break;
+            case R.id.pen:
+                setMode(0x20);
+                break;
+        }
+    }
+
+    private void setMode(int mode) {
+        mDrawView.setMode(mode);
+
+        switch (mode) {
+            case 0x10:
+                mClip.setBackgroundResource(R.drawable.ic_background_pressed);
+                mPen.setBackgroundResource(R.drawable.ic_background);
+                break;
+            case 0x20:
+                mClip.setBackgroundResource(R.drawable.ic_background);
+                mPen.setBackgroundResource(R.drawable.ic_background_pressed);
                 break;
         }
     }
