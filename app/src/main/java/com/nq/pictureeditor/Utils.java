@@ -1,6 +1,9 @@
 package com.nq.pictureeditor;
 
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.os.Environment;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,5 +26,16 @@ public class Utils {
         }
         String imageFilePath = new File(screenshotDir, imageFileName).getAbsolutePath();
         return imageFilePath;
+    }
+
+    public static Point mapped(Matrix M, float x, float y) {
+        float[] srcPoint = new float[]{x, y};
+        float[] mapPoint = new float[2];
+        Matrix invMat = new Matrix(M);
+        M.invert(invMat);
+        invMat.mapPoints(mapPoint, srcPoint);
+        Point mapped = new Point((int) mapPoint[0], (int) mapPoint[1]);
+
+        return mapped;
     }
 }

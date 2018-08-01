@@ -3,16 +3,14 @@ package com.nq.pictureeditor;
 import android.Manifest;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
-import java.io.File;
-import java.io.FileOutputStream;
+public class DrawActivity extends AppCompatActivity implements PenView.DrawInterface, View.OnClickListener {
 
-public class DrawActivity extends AppCompatActivity implements DrawView.DrawInterface, View.OnClickListener {
+    private PenView mPenView;
 
     private DrawView mDrawView;
     private ImageView mSave;
@@ -45,8 +43,13 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
         mClip.setOnClickListener(this);
         mPen.setOnClickListener(this);
 
-        mDrawView.init(mBitmap);
-        mDrawView.setFinishDraw(this);
+        //mDrawView.init(mBitmap);
+        //mDrawView.setFinishDraw(this);
+        //setMode(0x10);
+
+        mPenView = findViewById(R.id.penview);
+        mPenView.initBitmap(mBitmap);
+        mPenView.setFinishDraw(this);
         setMode(0x10);
 
         requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
@@ -81,13 +84,14 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
         int id = v.getId();
         switch (id) {
             case R.id.save:
-                mDrawView.goSave();
+                //mDrawView.goSave();
+                mPenView.goSave();
                 break;
             case R.id.back:
-                mDrawView.goBack();
+                mPenView.goBack();
                 break;
             case R.id.forward:
-                mDrawView.goForward();
+                mPenView.goForward();
                 break;
             case R.id.clip:
                 setMode(0x10);
@@ -99,7 +103,8 @@ public class DrawActivity extends AppCompatActivity implements DrawView.DrawInte
     }
 
     private void setMode(int mode) {
-        mDrawView.setMode(mode);
+        //mDrawView.setMode(mode);
+        mPenView.setMode(mode);
 
         switch (mode) {
             case 0x10:

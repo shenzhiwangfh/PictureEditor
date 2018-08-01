@@ -11,6 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/picture"
+        android:layout_alignParentTop="true"
+        android:visibility="gone" />
+
+    <com.nq.pictureeditor.PenView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/penview"
         android:layout_alignParentTop="true" />
 
     <LinearLayout
