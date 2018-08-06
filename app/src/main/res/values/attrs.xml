@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CornerLayout">
+        <attr name="element_radius" format="dimension" />
+        <attr name="element_imgs" format="reference" />
+        <attr name="element_values" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ItemView">
+        <attr name="property">
+            <enum name="ROOT" value="0"></enum>
+            <enum name="ITEM" value="1"></enum>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ArcColorPicker">
+        <attr name="picker_radius" format="dimension" />
+        <attr name="color_radius" format="dimension" />
+        <attr name="eraser" format="boolean" />
+        <attr name="eraser_img" format="reference" />
+        <attr name="colors" format="reference" />
+        <attr name="seekbar" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="ArcSeekBar">
+        <attr name="arc_radius" format="dimension" />
+        <attr name="arc_width" format="dimension" />
+        <attr name="min_value" format="integer" />
+        <attr name="max_value" format="integer" />
+        <attr name="value" format="integer" />
+        <attr name="slider_radius" format="dimension" />
+    </declare-styleable>
+</resources>

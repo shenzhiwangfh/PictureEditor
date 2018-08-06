@@ -5,19 +5,36 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
-public class DrawActivity extends AppCompatActivity implements PenView.DrawInterface, View.OnClickListener {
+import com.nq.pictureeditor.mode.EditMode;
+import com.nq.pictureeditor.view.ArcColorPicker;
+import com.nq.pictureeditor.view.ArcSeekBar;
+import com.nq.pictureeditor.view.CornerLayout;
+import com.nq.pictureeditor.view.DrawView;
 
-    private PenView mPenView;
+import javax.security.auth.login.LoginException;
+
+public class DrawActivity extends AppCompatActivity implements DrawInterface, View.OnClickListener {
+
+    private final static String TAG = "DrawActivity";
 
     private DrawView mDrawView;
+
     private ImageView mSave;
     private ImageView mBack;
     private ImageView mForward;
-    private ImageView mClip;
-    private ImageView mPen;
+    //private ImageView mClip;
+    //private ImageView mPen;
+
+    private CornerLayout mCornerLayout;
+
+    private EditMode mEditMode = new EditMode();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +44,29 @@ public class DrawActivity extends AppCompatActivity implements PenView.DrawInter
         BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
         Bitmap mBitmap = bitmapDrawable.getBitmap();
 
-        mDrawView = findViewById(R.id.picture);
         mSave = findViewById(R.id.save);
         mBack = findViewById(R.id.back);
         mForward = findViewById(R.id.forward);
-        mClip = findViewById(R.id.clip);
-        mPen = findViewById(R.id.pen);
+        //mClip = findViewById(R.id.clip);
+        //mPen = findViewById(R.id.pen);
+
+        /*
+        mArcSeekBar = findViewById(R.id.pen_size);
+        mArcColorPicker = findViewById(R.id.pen_color);
+        mArcSeekBar.setOnPickListener(new ArcSeekBar.OnChangeListener() {
+            @Override
+            public void onChange(int value) {
+                Log.e(TAG, "value=" + value);
+            }
+        });
+        mArcColorPicker.setOnPickListener(new ArcColorPicker.OnPickListener() {
+            @Override
+            public void onPick(int color) {
+                Log.e(TAG, "color=" + color);
+            }
+        });
+        */
+
 
         mBack.setEnabled(false);
         mForward.setEnabled(false);
@@ -40,17 +74,29 @@ public class DrawActivity extends AppCompatActivity implements PenView.DrawInter
         mSave.setOnClickListener(this);
         mBack.setOnClickListener(this);
         mForward.setOnClickListener(this);
-        mClip.setOnClickListener(this);
-        mPen.setOnClickListener(this);
+        //mClip.setOnClickListener(this);
+        //mPen.setOnClickListener(this);
 
         //mDrawView.init(mBitmap);
         //mDrawView.setFinishDraw(this);
         //setMode(0x10);
 
-        mPenView = findViewById(R.id.penview);
-        mPenView.initBitmap(mBitmap);
-        mPenView.setFinishDraw(this);
+        mDrawView = findViewById(R.id.penview);
+        mDrawView.initBitmap(mBitmap);
+        mDrawView.setFinishDraw(this);
         setMode(0x10);
+
+        mCornerLayout = findViewById(R.id.control);
+        mCornerLayout.setOnModeListener(new CornerLayout.OnModeListener() {
+            @Override
+            public void onChange(int mode) {
+                if(mode == 0) {
+                    setMode(0x10);
+                } else {
+                    setMode(0x20);
+                }
+            }
+        });
 
         requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
     }
@@ -85,35 +131,37 @@ public class DrawActivity extends AppCompatActivity implements PenView.DrawInter
         switch (id) {
             case R.id.save:
                 //mDrawView.goSave();
-                mPenView.goSave();
+                mDrawView.goSave();
                 break;
             case R.id.back:
-                mPenView.goBack();
+                mDrawView.goBack();
                 break;
             case R.id.forward:
-                mPenView.goForward();
+                mDrawView.goForward();
                 break;
+                /*
             case R.id.clip:
                 setMode(0x10);
                 break;
             case R.id.pen:
                 setMode(0x20);
                 break;
+                */
         }
     }
 
     private void setMode(int mode) {
         //mDrawView.setMode(mode);
-        mPenView.setMode(mode);
+        mDrawView.setMode(mode);
 
         switch (mode) {
             case 0x10:
-                mClip.setBackgroundResource(R.drawable.ic_background_pressed);
-                mPen.setBackgroundResource(R.drawable.ic_background);
+                //mClip.setBackgroundResource(R.drawable.ic_background_pressed);
+                //mPen.setBackgroundResource(R.drawable.ic_background);
                 break;
             case 0x20:
-                mClip.setBackgroundResource(R.drawable.ic_background);
-                mPen.setBackgroundResource(R.drawable.ic_background_pressed);
+                //mClip.setBackgroundResource(R.drawable.ic_background);
+                //mPen.setBackgroundResource(R.drawable.ic_background_pressed);
                 break;
         }
     }

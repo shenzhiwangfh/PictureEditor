@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="pen_colors">
+        <item>@color/white</item>
+        <item>@color/red</item>
+        <item>@color/yellow</item>
+        <item>@color/green</item>
+        <item>@color/blue</item>
+        <item>@color/purple</item>
+        <item>@color/grey</item>
+        <item>@color/black</item>
+    </integer-array>
+
+    <integer-array name="mode_imgs">
+        <item>@drawable/ic_menu_crop</item>
+        <item>@drawable/ic_menu_pen</item>
+        <item>@drawable/ic_menu_share</item>
+        <item>@drawable/ic_menu_save</item>
+    </integer-array>
+
+    <integer-array name="mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </integer-array>
+</resources>

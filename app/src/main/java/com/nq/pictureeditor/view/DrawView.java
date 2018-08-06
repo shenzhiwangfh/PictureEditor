@@ -1,4 +1,4 @@
-package com.nq.pictureeditor;
+package com.nq.pictureeditor.view;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -18,11 +18,18 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import com.nq.pictureeditor.ClipRecord;
+import com.nq.pictureeditor.DrawInterface;
+import com.nq.pictureeditor.PenRecord;
+import com.nq.pictureeditor.R;
+import com.nq.pictureeditor.Record;
+import com.nq.pictureeditor.Utils;
+
 import java.util.ArrayList;
 
-public class PenView extends View implements ScaleGestureDetector.OnScaleGestureListener {
+public class DrawView extends View implements ScaleGestureDetector.OnScaleGestureListener {
 
-    private final static String TAG = "PenView";
+    private final static String TAG = "DrawView";
 
     private Context mContext;
     private ScaleGestureDetector mGesture;
@@ -50,7 +57,7 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
     private RectF clipPictureRect;
 
     private RectF clipIconRect;
-    //private RectF tmpClipIconRect;
+    private RectF tmpClipIconRect;
     private RectF iconLeftTop, iconRightTop, iconLeftBottom, iconRightBottom;
     private RectF lineLeft, lineRight, lineTop, lineBottom;
 
@@ -79,6 +86,7 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
     private final static int MODE_T_LINE = 0x19;
     private final static int MODE_B_LINE = 0x1A;
     private final static int MODE_PEN = 0x20;
+
     private int moveMode = MODE_CLIP;
     private Matrix M = new Matrix();
     private float downX, downY;
@@ -86,12 +94,7 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
 
     private ArrayList<Record> mRecords = new ArrayList<>();
     private int mIndex = -1;
-
-    public interface DrawInterface {
-        void finishAction(boolean back, boolean forward);
-
-        void save(Bitmap newBitmap);
-    }
+    private boolean mChanged = false;
 
     private DrawInterface draw;
 
@@ -99,11 +102,11 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
         this.draw = draw;
     }
 
-    public PenView(Context context) {
+    public DrawView(Context context) {
         this(context, null);
     }
 
-    public PenView(Context context, @Nullable AttributeSet attrs) {
+    public DrawView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         mRes = mContext.getResources();
@@ -144,10 +147,10 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
         final int screenHeight = dm.heightPixels;
 
         mRes = mContext.getResources();
-        final float paddingTop = mRes.getDimension(R.dimen.picture_top_padding);
-        final float paddingLeft = mRes.getDimension(R.dimen.picture_left_padding);
-        final float maxHeight = mRes.getDimension(R.dimen.picture_max_height);
-        canvasRect = new RectF(paddingLeft, paddingTop, screenWidth - paddingLeft, paddingTop + maxHeight);
+        final float padding = mRes.getDimension(R.dimen.picture_padding);
+        //final float paddingLeft = mRes.getDimension(R.dimen.picture_left_padding);
+        //final float maxHeight = mRes.getDimension(R.dimen.picture_max_height);
+        canvasRect = new RectF(padding, padding, screenWidth - padding, screenHeight - padding);
 
         float bitmapRatio = (float) mOriginBitmap.getHeight() / (float) mOriginBitmap.getWidth();
         float canvasRatio = canvasRect.height() / canvasRect.width();
@@ -244,7 +247,7 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
             right = clipPictureRect.right + ICON_WIDTH;
             bottom = clipPictureRect.bottom + ICON_WIDTH;
             clipIconRect = new RectF(left, top, right, bottom);
-            //tmpClipIconRect = new RectF(clipIconRect);
+            tmpClipIconRect = new RectF(clipIconRect);
         } else {
             if (moveMode == MODE_CLIP) {
                 left = clipPictureRect.left - ICON_WIDTH;
@@ -370,7 +373,6 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
         }
     }
 
-
     private void matrix() {
         M.setRectToRect(bitmapRect, pictureRect, Matrix.ScaleToFit.FILL);
     }
@@ -386,7 +388,35 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
                     Log.e(TAG, "ACTION_DOWN," + downX + "," + downY);
 
                     if ((moveMode & MODE_CLIP) == MODE_CLIP) {
-                        moveMode = MODE_PICTURE;
+                        if (iconLeftTop.contains(downX, downY)) {
+                            moveMode = MODE_LT_ICON;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (iconRightTop.contains(downX, downY)) {
+                            moveMode = MODE_RT_ICON;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (iconLeftBottom.contains(downX, downY)) {
+                            moveMode = MODE_LB_ICON;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (iconRightBottom.contains(downX, downY)) {
+                            moveMode = MODE_RB_ICON;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (lineLeft.contains(downX, downY)) {
+                            moveMode = MODE_L_LINE;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (lineRight.contains(downX, downY)) {
+                            moveMode = MODE_R_LINE;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (lineTop.contains(downX, downY)) {
+                            moveMode = MODE_T_LINE;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (lineBottom.contains(downX, downY)) {
+                            moveMode = MODE_B_LINE;
+                            tmpClipIconRect.set(clipIconRect);
+                        } else if (clipPictureRect.contains(downX, downY)) {
+                            moveMode = MODE_PICTURE;
+                            tmpClipIconRect.set(pictureRect);
+                        }
+                        //invalidate();
                     } else if (moveMode == MODE_PEN) {
                         mPenPath.reset();
                         Point mapped = Utils.mapped(M, downX, downY);
@@ -401,7 +431,83 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
                 }
                 break;
                 case MotionEvent.ACTION_MOVE: {
-                    if (moveMode == MODE_PICTURE) {
+                    if (moveMode == MODE_LT_ICON) {
+                        float clipOffsetX = event.getX() - downX;
+                        float clipOffsetY = event.getY() - downY;
+
+                        if ((clipPictureRect.right - clipPictureRect.left - clipOffsetX) < CLIP_MIN_SIZE) {
+                            clipOffsetX = clipPictureRect.right - clipPictureRect.left - CLIP_MIN_SIZE;
+                        }
+                        if ((clipPictureRect.bottom - clipPictureRect.top - clipOffsetY) < CLIP_MIN_SIZE) {
+                            clipOffsetY = clipPictureRect.bottom - clipPictureRect.top - CLIP_MIN_SIZE;
+                        }
+                        float left = Math.max(canvasRect.left, pictureRect.left);
+                        float top = Math.max(canvasRect.top, pictureRect.top);
+                        if (clipPictureRect.left + clipOffsetX < left)
+                            clipOffsetX = left - clipPictureRect.left;
+                        if (clipPictureRect.top + clipOffsetY < top)
+                            clipOffsetY = top - clipPictureRect.top;
+
+                        setClipIconRect(clipOffsetX, clipOffsetY);
+                        invalidate();
+                    } else if (moveMode == MODE_RT_ICON) {
+                        float clipOffsetX = event.getX() - downX;
+                        float clipOffsetY = event.getY() - downY;
+
+                        if ((clipPictureRect.right - clipPictureRect.left + clipOffsetX) < CLIP_MIN_SIZE) {
+                            clipOffsetX = clipPictureRect.left - clipPictureRect.right + CLIP_MIN_SIZE;
+                        }
+                        if ((clipPictureRect.bottom - clipPictureRect.top - clipOffsetY) < CLIP_MIN_SIZE) {
+                            clipOffsetY = clipPictureRect.bottom - clipPictureRect.top - CLIP_MIN_SIZE;
+                        }
+                        float right = Math.min(canvasRect.right, pictureRect.right);
+                        float top = Math.max(canvasRect.top, pictureRect.top);
+                        if (clipPictureRect.right + clipOffsetX > right)
+                            clipOffsetX = right - clipPictureRect.right;
+                        if (clipPictureRect.top + clipOffsetY < top)
+                            clipOffsetY = top - clipPictureRect.top;
+
+                        setClipIconRect(clipOffsetX, clipOffsetY);
+                        invalidate();
+                    } else if (moveMode == MODE_LB_ICON) {
+                        float clipOffsetX = event.getX() - downX;
+                        float clipOffsetY = event.getY() - downY;
+
+                        if ((clipPictureRect.right - clipPictureRect.left - clipOffsetX) < CLIP_MIN_SIZE) {
+                            clipOffsetX = clipPictureRect.right - clipPictureRect.left - CLIP_MIN_SIZE;
+                        }
+                        if ((clipPictureRect.bottom - clipPictureRect.top + clipOffsetY) < CLIP_MIN_SIZE) {
+                            clipOffsetY = clipPictureRect.top - clipPictureRect.bottom + CLIP_MIN_SIZE;
+                        }
+                        float left = Math.max(canvasRect.left, pictureRect.left);
+                        float bottom = Math.min(canvasRect.bottom, pictureRect.bottom);
+                        if (clipPictureRect.left + clipOffsetX < left)
+                            clipOffsetX = left - clipPictureRect.left;
+                        if (clipPictureRect.bottom + clipOffsetY > bottom)
+                            clipOffsetY = bottom - clipPictureRect.bottom;
+
+                        setClipIconRect(clipOffsetX, clipOffsetY);
+                        invalidate();
+                    } else if (moveMode == MODE_RB_ICON) {
+                        float clipOffsetX = event.getX() - downX;
+                        float clipOffsetY = event.getY() - downY;
+
+                        if ((clipPictureRect.right - clipPictureRect.left + clipOffsetX) < CLIP_MIN_SIZE) {
+                            clipOffsetX = clipPictureRect.left - clipPictureRect.right + CLIP_MIN_SIZE;
+                        }
+                        if ((clipPictureRect.bottom - clipPictureRect.top + clipOffsetY) < CLIP_MIN_SIZE) {
+                            clipOffsetY = clipPictureRect.top - clipPictureRect.bottom + CLIP_MIN_SIZE;
+                        }
+                        float right = Math.min(canvasRect.right, pictureRect.right);
+                        float bottom = Math.min(canvasRect.bottom, pictureRect.bottom);
+                        if (clipPictureRect.right + clipOffsetX > right)
+                            clipOffsetX = right - clipPictureRect.right;
+                        if (clipPictureRect.bottom + clipOffsetY > bottom)
+                            clipOffsetY = bottom - clipPictureRect.bottom;
+
+                        setClipIconRect(clipOffsetX, clipOffsetY);
+                        invalidate();
+                    } else if (moveMode == MODE_PICTURE) {
                         picOffsetX = event.getX() - downX;
                         picOffsetY = event.getY() - downY;
 
@@ -427,18 +533,10 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
                 }
                 break;
                 case MotionEvent.ACTION_UP:
-                    if (moveMode == MODE_CLIP) {
-                        //M.setScale(mZoomScale, mZoomScale);
-                        //M.setTranslate((pictureRect.left - originRect.left) / 2, (pictureRect.top - originRect.top) / 2);
-
-                        //cluRect();
-
-
-                        Log.e(TAG, "ACTION_UP");
-                        //setPrePictureRect();
-                        //setPictureRect();
-                        //matrix();
-                        //invalidate();
+                    if (moveMode >= MODE_LT_ICON && moveMode <= MODE_B_LINE) {
+                        cluRect();
+                    } else if (moveMode == MODE_SCALE) {
+                        cluRect();
                     } else if (moveMode == MODE_PICTURE) {
                         cluRect();
                     } else if (moveMode == MODE_PEN) {
@@ -448,6 +546,7 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
                         mDrawCanvas.drawPath(mPenPath, mPenPaint);
 
                         //mDrawing = false;
+                        mChanged = true;
                         addRecord(MODE_PEN);
 
                         redrawBitmap();
@@ -532,11 +631,6 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
         cluRect();
-    }
-
-    public void setMode(int mode) {
-        moveMode = mode;
-        invalidate();
     }
 
     private void cluRect() {
@@ -625,9 +719,10 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
             right = left + pictureRect.width() * scale;
             bottom = top + pictureRect.height() * scale;
             pictureRect.set(left, top, right, bottom);
-            mZoomScale = pictureRect.height() / originRect.height();
+            mZoomScale = pictureRect.height() / mOriginBitmap.getHeight();
             clipPictureRect.set(tmpClipLarge);
             setClipBitmapRect();
+            matrix();
             setClipIconRect(0, 0);
             invalidate();
         }
@@ -637,6 +732,8 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
         setPrePictureRect();
 
         invalidateBtn();
+
+        mChanged = true;
     }
 
     private void redrawBitmap() {
@@ -658,6 +755,8 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
     }
 
     private void addRecord(int mode) {
+        if(!mChanged) return;
+
         if (mIndex < (mRecords.size() - 1)) {
             for (int i = (mIndex + 1); i < mRecords.size(); i++) {
                 mRecords.remove(i);
@@ -665,12 +764,10 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
         }
 
         if ((mode & MODE_CLIP) == MODE_CLIP) {
-            /*
             ClipRecord record = new ClipRecord();
             record.pictureRect = new RectF(pictureRect);
             record.clipPictureRect = new RectF(clipPictureRect);
             mRecords.add(record);
-            */
         } else if ((mode & MODE_PEN) == MODE_PEN) {
             PenRecord record = new PenRecord();
             record.paint = new Paint(mPenPaint);
@@ -725,7 +822,6 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
             invalidate();
             */
         } else if (record instanceof PenRecord) {
-            //PenRecord penRecord = (PenRecord) record;
             mIndex++;
             invalidateBtn();
             redrawBitmap();
@@ -743,5 +839,11 @@ public class PenView extends View implements ScaleGestureDetector.OnScaleGesture
                     (int) clipBitmapRect.height());
             draw.save(newBitmap);
         }
+    }
+
+    public void setMode(int mode) {
+        moveMode = mode;
+        mChanged = false;
+        invalidate();
     }
 }
