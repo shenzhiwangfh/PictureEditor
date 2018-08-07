@@ -32,6 +32,7 @@ public class ArcSeekBar extends View {
     private int minValue;
     private int value;
     private float percent;
+    private int defaultValue;
 
     private RectF arcRect = new RectF();
 
@@ -44,14 +45,19 @@ public class ArcSeekBar extends View {
     private int touchMode;
     private float downX, downY;
 
-    public interface OnChangeListener {
-        void onChange(int value);
+    public interface OnSlideListener {
+        void onSlide(View view, int value);
     }
 
-    private OnChangeListener l;
+    private OnSlideListener slideListener;
+    private OnShowListener showListener;
 
-    public void setOnPickListener(OnChangeListener onChangeListener) {
-        l = onChangeListener;
+    public void setOnSlideListener(OnSlideListener onSlideListener) {
+        this.slideListener = onSlideListener;
+    }
+
+    public void setOnShowListener(OnShowListener onShowListener) {
+        this.showListener = onShowListener;
     }
 
     public ArcSeekBar(Context context) {
@@ -67,7 +73,7 @@ public class ArcSeekBar extends View {
         sliderRadius = a.getDimensionPixelOffset(R.styleable.ArcSeekBar_slider_radius, 40);
         maxValue = a.getInteger(R.styleable.ArcSeekBar_max_value, 100);
         minValue = a.getInteger(R.styleable.ArcSeekBar_min_value, 0);
-        value = a.getInteger(R.styleable.ArcSeekBar_value, 0);
+        value = defaultValue = a.getInteger(R.styleable.ArcSeekBar_default_value, 0);
         a.recycle();
 
         init();
@@ -162,6 +168,7 @@ public class ArcSeekBar extends View {
                 touchMode = TOUCH_NULL;
                 if (ViewUtils.contain(sliderPoint, sliderRadius, downX, downY, 30)) {
                     touchMode = TOUCH_SLIDER;
+                    if(showListener != null) showListener.onShow(this, true);
                 }
             }
             break;
@@ -188,12 +195,12 @@ public class ArcSeekBar extends View {
                     invalidate();
 
                     int v = minValue + (int) ((maxValue - minValue) * p);
-                    if (l != null) l.onChange(v);
+                    if (slideListener != null) slideListener.onSlide(this, v);
                 }
             }
             break;
             case MotionEvent.ACTION_UP: {
-
+                if(showListener != null) showListener.onShow(this, false);
             }
             break;
         }
@@ -220,5 +227,9 @@ public class ArcSeekBar extends View {
 
     public int getMinValue() {
         return minValue;
+    }
+
+    public int getDefaultValue() {
+        return defaultValue;
     }
 }

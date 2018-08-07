@@ -249,32 +249,23 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
         if (velocityX > 50f && velocityY > 50f) {
             mIndex = (mIndex + 1) % mChildCount;
             if(l != null) l.onChange(mIndex);
-
-            Log.e(TAG, "onFling,next=" + mIndex);
         } else if (velocityX < -50f && velocityY < -50f) {
             mIndex = (mIndex - 1 + mChildCount) % mChildCount;
             if(l != null) l.onChange(mIndex);
-
-            Log.e(TAG, "onFling,pre=" + mIndex);
         } else if (velocityX > 50f && velocityY < -50f) {
             open = true;
             for (int i = 0; i < mChildCount; i++) {
                 View child = getChildAt(i);
                 child.setVisibility(View.VISIBLE);
             }
-
-
-            Log.e(TAG, "onFling,open");
         } else if (velocityX < -50f && velocityY > 50f) {
             open = false;
             for (int i = 0; i < mChildCount; i++) {
                 View child = getChildAt(i);
                 child.setVisibility(View.GONE);
             }
-
-            Log.e(TAG, "onFling,close");
         } else {
-            Log.e(TAG, "onFling,ignore");
+
         }
 
         invalidate();

@@ -8,7 +8,7 @@
     tools:context=".DrawActivity">
 
     <com.nq.pictureeditor.view.DrawView
-        android:id="@+id/penview"
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true" />
@@ -89,9 +89,9 @@
                 android:padding="8dp"
                 app:color_radius="10dp"
                 app:colors="@array/pen_colors"
-                app:eraser="true"
-                app:picker_radius="140dp"
-                app:seekbar="false" />
+                app:values="@array/pen_values"
+                app:default_color="@integer/pen_default_color"
+                app:picker_radius="140dp" />
 
             <com.nq.pictureeditor.view.ArcSeekBar
                 android:id="@+id/pen_size"
@@ -102,10 +102,18 @@
                 android:padding="12dp"
                 app:arc_radius="80dp"
                 app:arc_width="4dp"
-                app:max_value="100"
-                app:min_value="20"
+                app:max_value="@integer/pen_max_size"
+                app:min_value="@integer/pen_min_size"
                 app:slider_radius="10dp"
-                app:value="50" />
+                app:default_value="@integer/pen_default_size" />
         </RelativeLayout>
     </com.nq.pictureeditor.view.CornerLayout>
+
+    <com.nq.pictureeditor.view.PreView
+        android:id="@+id/preview"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
 </RelativeLayout>

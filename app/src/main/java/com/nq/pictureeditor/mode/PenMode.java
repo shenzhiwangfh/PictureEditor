@@ -11,4 +11,9 @@ public class PenMode extends EditMode {
 
     public Matrix M;
     public RectF clip;
+
+    @Override
+    public int getMode() {
+        return MODE_PEN;
+    }
 }

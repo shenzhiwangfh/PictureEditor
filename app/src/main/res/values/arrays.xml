@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer-array name="pen_colors">
+        <item>@drawable/ic_menu_share</item>
         <item>@color/white</item>
         <item>@color/red</item>
         <item>@color/yellow</item>
@@ -9,6 +10,18 @@
         <item>@color/purple</item>
         <item>@color/grey</item>
         <item>@color/black</item>
+    </integer-array>
+
+    <integer-array name="pen_values">
+        <item>1</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
     </integer-array>
 
     <integer-array name="mode_imgs">

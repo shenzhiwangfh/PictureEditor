@@ -3,6 +3,7 @@ package com.nq.pictureeditor.mode;
 import android.graphics.RectF;
 
 public class ClipMode extends EditMode {
+    /*
     public final static int MODE_NORMAL = 1;
     public final static int MODE_PICTURE = 2;
     public final static int MODE_SCALE = 3;
@@ -16,6 +17,13 @@ public class ClipMode extends EditMode {
     public final static int MODE_B_LINE = 11;
 
     public int clipMode = MODE_NORMAL;
+    */
+
     public RectF pictureRect;
     public RectF clipPictureRect;
+
+    @Override
+    public int getMode() {
+        return MODE_CLIP;
+    }
 }

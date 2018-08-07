@@ -9,6 +9,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -24,6 +26,7 @@ import com.nq.pictureeditor.PenRecord;
 import com.nq.pictureeditor.R;
 import com.nq.pictureeditor.Record;
 import com.nq.pictureeditor.Utils;
+import com.nq.pictureeditor.control.PenController;
 
 import java.util.ArrayList;
 
@@ -65,7 +68,9 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     private RectF clipBitmapRect;
 
     private Paint mDrawPaint;
-    private Paint mPenPaint;
+    private Paint mColorPaint = new Paint();
+    private Paint mEraserPaint = new Paint();
+    private Paint mPenPaint = new Paint();
     private Paint mIconPaint;
 
     private Path mPenPath;
@@ -96,6 +101,8 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     private int mIndex = -1;
     private boolean mChanged = false;
 
+    //private EditController mController;
+
     private DrawInterface draw;
 
     public void setFinishDraw(DrawInterface draw) {
@@ -115,19 +122,34 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         init();
     }
 
+    private void buildColorPaint() {
+        mColorPaint.setAntiAlias(true);
+        mColorPaint.setStyle(Paint.Style.STROKE);
+        mColorPaint.setStrokeCap(Paint.Cap.ROUND);
+        mColorPaint.setStrokeJoin(Paint.Join.ROUND);
+        //mColorPaint.setColor(color);
+        //mColorPaint.setStrokeWidth(size);
+    }
+
+    private void buildEraserPaint() {
+        mEraserPaint.setAlpha(0);
+        //下面这句代码是橡皮擦设置的重点
+        mEraserPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+        mEraserPaint.setAntiAlias(true);
+        mEraserPaint.setDither(true);
+        mEraserPaint.setStyle(Paint.Style.STROKE);
+        mEraserPaint.setStrokeJoin(Paint.Join.ROUND);
+        //mEraserPaint.setStrokeWidth(size);
+    }
+
     private void init() {
         mPenPath = new Path();
 
+        buildColorPaint();
+        buildEraserPaint();
+
         mDrawPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mDrawPaint.setColor(Color.BLACK);
-
-        mPenPaint = new Paint();
-        mPenPaint.setAntiAlias(true);
-        mPenPaint.setStyle(Paint.Style.STROKE);
-        mPenPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPenPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPenPaint.setColor(Color.BLACK);
-        mPenPaint.setStrokeWidth(10);
 
         mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mIconPaint.setColor(Color.RED);
@@ -147,10 +169,11 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         final int screenHeight = dm.heightPixels;
 
         mRes = mContext.getResources();
-        final float padding = mRes.getDimension(R.dimen.picture_padding);
-        //final float paddingLeft = mRes.getDimension(R.dimen.picture_left_padding);
-        //final float maxHeight = mRes.getDimension(R.dimen.picture_max_height);
-        canvasRect = new RectF(padding, padding, screenWidth - padding, screenHeight - padding);
+        final float leftPadding = mRes.getDimension(R.dimen.picture_left_padding);
+        final float topPadding = mRes.getDimension(R.dimen.picture_top_padding);
+        final float rightPadding = mRes.getDimension(R.dimen.picture_right_padding);
+        final float bottomPadding = mRes.getDimension(R.dimen.picture_bottom_padding);
+        canvasRect = new RectF(leftPadding, topPadding, screenWidth - rightPadding, screenHeight - bottomPadding);
 
         float bitmapRatio = (float) mOriginBitmap.getHeight() / (float) mOriginBitmap.getWidth();
         float canvasRatio = canvasRect.height() / canvasRect.width();
@@ -845,5 +868,17 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         moveMode = mode;
         mChanged = false;
         invalidate();
+    }
+
+    public void setPen(int color, int size, boolean eraser) {
+        if(eraser) {
+            mPenPaint = new Paint(mEraserPaint);//.set(mEraserPaint);
+            mPenPaint.setStrokeWidth(size);
+            mPenPaint.setColor(Color.TRANSPARENT);
+        } else {
+            mPenPaint = new Paint(mColorPaint);//.set(mColorPaint);
+            mPenPaint.setStrokeWidth(size);
+            mPenPaint.setColor(color);
+        }
     }
 }

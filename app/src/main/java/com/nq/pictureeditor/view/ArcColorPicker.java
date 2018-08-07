@@ -12,8 +12,10 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.SeekBar;
 
 import com.nq.pictureeditor.R;
 
@@ -21,50 +23,42 @@ public class ArcColorPicker extends View {
 
     private final static String TAG = "ArcColorPicker";
     private final static int SelectedEdge = 3;
-    private final static int SeekBarWidth = 180;
-    private final static int StickWidth = 4;
-    private final static int SliderRadius = 42;
 
     private final static int TOUCH_NULL = 0;
-    private final static int TOUCH_SLIDER = 1;
-    private final static int TOUCH_COLOR = 2;
+    private final static int TOUCH_COLOR = 1;
 
     private int radius;
     private int colorRadius;
-    private boolean eraser;
-    private Bitmap eraserBmp;
-    private boolean hasSeekBar;
     private int[] colors;
+    private int[] values;
+    private int defauleValue;
     private int count;
 
-    private Rect eraserBmpRect;
-    private RectF eraserRect;
-
     private PointF rootPoint = new PointF();
-    private PointF eraserPoint = new PointF();
     private PointF colorPoints[];// = new PointF[];
+    private RectF imageRectF = new RectF();
+    private Rect bitmapRect = new Rect();
 
-    private Paint mEraserPaint;
     private Paint mColorPaint;
-    private Paint mSeekBarPaint;
-
-    private RectF seekbarRect = new RectF();
-    private RectF stickRect = new RectF();
-    private PointF sliderPoint = new PointF();
 
     private int touchMode;
     private float downX, downY;
 
-    private int mIndex = -1;
+    private int mIndex = 0;
 
     public interface OnPickListener {
-        void onPick(int color);
+        void onPick(View view, int resId);
     }
 
-    private OnPickListener l;
+    private OnPickListener pickListener;
+    private OnShowListener showListener;
 
     public void setOnPickListener(OnPickListener onPickListener) {
-        l = onPickListener;
+        pickListener = onPickListener;
+    }
+
+    public void setOnShowListener(OnShowListener onShowListener) {
+        this.showListener = onShowListener;
     }
 
     public ArcColorPicker(Context context) {
@@ -77,34 +71,32 @@ public class ArcColorPicker extends View {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ArcColorPicker);
         radius = a.getDimensionPixelOffset(R.styleable.ArcColorPicker_picker_radius, 200);
         colorRadius = a.getDimensionPixelOffset(R.styleable.ArcColorPicker_color_radius, 20);
-        eraser = a.getBoolean(R.styleable.ArcColorPicker_eraser, false);
-        if (eraser) {
-            BitmapDrawable eraserImg = (BitmapDrawable) a.getDrawable(R.styleable.ArcColorPicker_eraser_img);
-            if (eraserImg == null) {
-                eraserImg = (BitmapDrawable) a.getResources().getDrawable(R.drawable.ic_menu_crop, null);
-            }
-            eraserBmp = eraserImg.getBitmap();
-            eraserBmpRect = new Rect(0, 0, eraserBmp.getWidth(), eraserBmp.getHeight());
-            eraserRect = new RectF();
-        }
-        hasSeekBar = a.getBoolean(R.styleable.ArcColorPicker_seekbar, false);
-        int valuesResId = a.getResourceId(R.styleable.ArcColorPicker_colors, 0);
+        mIndex = defauleValue = a.getInteger(R.styleable.ArcColorPicker_default_color, 0);
+
+        int valuesResId = a.getResourceId(R.styleable.ArcColorPicker_values, 0);
         if (valuesResId == 0) {
             throw new IllegalArgumentException("ArcColorPicker: error - colors is not specified");
         }
-        colors = a.getResources().getIntArray(valuesResId);
-        a.recycle();
+        values = a.getResources().getIntArray(valuesResId);
 
+        valuesResId = a.getResourceId(R.styleable.ArcColorPicker_colors, 0);
+        if (valuesResId == 0) {
+            throw new IllegalArgumentException("ArcColorPicker: error - colors is not specified");
+        }
+        //colors = a.getResources().getIntArray(valuesResId);
+        TypedArray array = a.getResources().obtainTypedArray(valuesResId);
+        colors = new int[array.length()];
+        for (int i = 0; i < array.length(); i++) {
+            colors[i] = array.getResourceId(i, 0);
+        }
+        array.recycle();
+
+        a.recycle();
         init();
     }
 
     private void init() {
         count = colors.length;
-        //if(eraser) count++;
-
-        if (hasSeekBar) {
-            rootPoint.x = rootPoint.x + SeekBarWidth;
-        }
 
         colorPoints = new PointF[count];
         for (int i = 0; i < count; i++) {
@@ -115,34 +107,20 @@ public class ArcColorPicker extends View {
         mColorPaint.setAntiAlias(true);
         mColorPaint.setStyle(Paint.Style.FILL);
         mColorPaint.setColor(Color.GRAY);
-
-        mEraserPaint = new Paint();
-
-        mSeekBarPaint = new Paint();
-        mSeekBarPaint.setColor(Color.GRAY);
     }
+
+    float sweepArc;
+    float startArc;
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
 
-        int allCount = eraser ? count : (count - 1);
-        float sweepArc = (float) Math.PI / 2.0f / (float) allCount;
-        float startArc = (float) Math.PI / 2.0f * 3.0f;
-
-        if (eraser) {
-            //float itemArc = startArc;
-            double sin = Math.sin(startArc);
-            double cos = Math.cos(startArc);
-
-            int x = (int) (rootPoint.x + radius * cos);
-            int y = (int) (rootPoint.y + radius * sin);
-            eraserPoint.set(x, y);
-        }
+        sweepArc = (float) Math.PI / 2.0f / (float) (count - 1);
+        startArc = (float) Math.PI / 2.0f * 3.0f;
 
         for (int i = 0; i < count; i++) {
-            int index = eraser ? (i + 1) : i;
-            float itemArc = startArc + sweepArc * index;
+            float itemArc = startArc + sweepArc * i;
             double sin = Math.sin(itemArc);
             double cos = Math.cos(itemArc);
 
@@ -165,13 +143,6 @@ public class ArcColorPicker extends View {
 
         rootPoint.x = getPaddingStart() + colorRadius;
         rootPoint.y = size - getPaddingBottom() - colorRadius;
-
-        if (hasSeekBar) {
-            seekbarRect.set(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + SeekBarWidth, height - getPaddingBottom());
-            sliderPoint.x = getPaddingLeft() + SeekBarWidth / 2;
-            sliderPoint.y = getPaddingTop() + colorRadius;
-            stickRect.set(sliderPoint.x - StickWidth / 2, sliderPoint.y, sliderPoint.x + StickWidth / 2, sliderPoint.y + radius);
-        }
     }
 
     private int measureWidth(int defaultWidth, int measureSpec) {
@@ -212,36 +183,36 @@ public class ArcColorPicker extends View {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (hasSeekBar) {
-            mSeekBarPaint.setColor(Color.DKGRAY);
-            canvas.drawRect(stickRect, mSeekBarPaint);
-            mSeekBarPaint.setColor(Color.GRAY);
-            canvas.drawCircle(sliderPoint.x, sliderPoint.y, SliderRadius, mSeekBarPaint);
-        }
-
-        if (eraser) {
-            if (mIndex == -1) {
-                mColorPaint.setColor(Color.GRAY);
-                canvas.drawCircle(eraserPoint.x, eraserPoint.y, colorRadius + SelectedEdge, mColorPaint);
-            }
-            mColorPaint.setColor(Color.RED);
-            canvas.drawCircle(eraserPoint.x, eraserPoint.y, colorRadius, mColorPaint);
-
-            float left = eraserPoint.x - colorRadius;
-            float top = eraserPoint.y - colorRadius;
-            float right = eraserPoint.x + colorRadius;
-            float bottom = eraserPoint.y + colorRadius;
-            drawBitmap(canvas, mEraserPaint, left, top, right, bottom, eraserBmpRect);
-        }
-
         for (int i = 0; i < count; i++) {
             if (mIndex == i) {
                 mColorPaint.setColor(Color.GRAY);
                 canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius + SelectedEdge, mColorPaint);
             }
 
-            mColorPaint.setColor(colors[i]);
-            canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
+            if (values[i] == 0) {
+                int color = getResources().getColor(colors[i], null);
+                if (color == Color.WHITE) {
+                    mColorPaint.setColor(Color.BLACK);
+                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
+
+                    mColorPaint.setColor(color);
+                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius - SelectedEdge, mColorPaint);
+                } else {
+                    mColorPaint.setColor(color);
+                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
+                }
+            } else if (values[i] == 1) {
+                BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(colors[i], null);
+                if (drawable != null) {
+                    mColorPaint.setColor(Color.BLACK);
+                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
+
+                    Bitmap bitmap = drawable.getBitmap();
+                    bitmapRect.set(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                    drawBitmap(colorPoints[i], colorRadius, bitmapRect);
+                    canvas.drawBitmap(bitmap, bitmapRect, imageRectF, mColorPaint);
+                }
+            }
         }
     }
 
@@ -254,21 +225,14 @@ public class ArcColorPicker extends View {
                 downX = event.getX();
                 downY = event.getY();
 
-                if(ViewUtils.contain(sliderPoint, SliderRadius, downX, downY, 10)) {
-                    touchMode = TOUCH_SLIDER;
-                } else if (ViewUtils.contain(eraserPoint, colorRadius, downX, downY, 10)) {
-                    if (l != null) l.onPick(-1);
-                    mIndex = -1;
-                    touchMode = TOUCH_COLOR;
-                    invalidate();
-                } else {
-                    for (int i = 0; i < count; i++) {
-                        if (ViewUtils.contain(colorPoints[i], colorRadius, downX, downY, 10)) {
-                            if (l != null) l.onPick(colors[i]);
-                            mIndex = i;
-                            touchMode = TOUCH_COLOR;
-                            invalidate();
-                        }
+                for (int i = 0; i < count; i++) {
+                    if (ViewUtils.contain(colorPoints[i], colorRadius, downX, downY, 10)) {
+                        mIndex = i;
+                        if (pickListener != null) pickListener.onPick(this, colors[mIndex]);
+                        if (showListener != null) showListener.onShow(this, true);
+
+                        touchMode = TOUCH_COLOR;
+                        invalidate();
                     }
                 }
             }
@@ -276,43 +240,71 @@ public class ArcColorPicker extends View {
             case MotionEvent.ACTION_MOVE: {
                 float x = event.getX();
                 float y = event.getY();
+                float inner = radius - colorRadius;
+                float outer = radius + colorRadius;
 
-                if(seekbarRect.contains(x, y) &&
-                        (y >= stickRect.top) &&
-                        (y <= stickRect.bottom) &&
-                        (touchMode == TOUCH_SLIDER)) {
-                    sliderPoint.y = y;
+                if (ViewUtils.contain(rootPoint, inner, outer, x, y, 60) &&
+                        //(x >= rootPoint.x) &&
+                        //(x <= rootPoint.x + arcRadius) &&
+                        //(y >= rootPoint.y - arcRadius) &&
+                        //(y <= rootPoint.y) &&
+                        (touchMode == TOUCH_COLOR)) {
+
+                    if (x < rootPoint.x) x = rootPoint.x;
+                    if (x > rootPoint.x + radius) x = rootPoint.x + radius;
+                    if (y < rootPoint.y - radius) y = rootPoint.y - radius;
+                    if (y > rootPoint.y) y = rootPoint.y;
+
+                    mIndex = position2index(x, y);
+                    if (pickListener != null) pickListener.onPick(this, colors[mIndex]);
+
                     invalidate();
-                } else if(touchMode == TOUCH_NULL) {
-
-                } else if(touchMode == TOUCH_COLOR) {
-                    for (int i = 0; i < count; i++) {
-                        if (ViewUtils.contain(colorPoints[i], colorRadius, x, y, 10)) {
-                            if (l != null) l.onPick(colors[i]);
-                            mIndex = i;
-                            invalidate();
-                        }
-                    }
                 }
+            }
+            break;
+            case MotionEvent.ACTION_UP: {
+                if (showListener != null) showListener.onShow(this, false);
             }
             break;
         }
         return (touchMode == TOUCH_COLOR);
     }
 
-    private void drawBitmap(Canvas canvas, Paint paint, float left, float top, float right, float bottom, Rect bmpRect) {
+    private int position2index(float x, float y) {
+        int index = 0;
 
-        float offsetx = ((right - left) - bmpRect.width()) / 2;
-        float offsety = ((bottom - top) - bmpRect.height()) / 2;
-        if (offsetx > 0) {
-            left = left + offsetx;
-            right = right - offsetx;
+        float h = Math.abs(x - rootPoint.x);
+        float v = Math.abs(y - rootPoint.y);
+        float r = (float) Math.pow(Math.pow(h, 2) + Math.pow(v, 2), 0.5);
+        float sweep = (float) Math.asin(h / r);
+
+        for (; index < count; index++) {
+            if (sweep <= sweepArc * index) {
+                break;
+            }
         }
-        if (offsety > 0) {
-            top = top + offsety;
-            bottom = bottom - offsety;
-        }
-        eraserRect.set(left, top, right, bottom);
-        canvas.drawBitmap(eraserBmp, eraserBmpRect, eraserRect, paint);
+
+        return index;
+    }
+
+    private void drawBitmap(PointF center, float r, Rect bmpRect) {
+        float left, top, right, bottom;
+        r = r - 6; //contract
+
+        float offsetx = (r * 2 - bmpRect.width()) / 2;
+        float offsety = (r * 2 - bmpRect.height()) / 2;
+        if (offsetx < 0) offsetx = 0.0f;
+        if (offsety < 0) offsety = 0.0f;
+
+        left = center.x - r + offsetx;
+        right = center.x + r - offsetx;
+        top = center.y - r + offsety;
+        bottom = center.y + r - offsety;
+
+        imageRectF.set(left, top, right, bottom);
+    }
+
+    public int getDefauleValue() {
+        return defauleValue;
     }
 }
