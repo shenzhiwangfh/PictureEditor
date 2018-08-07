@@ -29,9 +29,6 @@ public class PenController implements ArcColorPicker.OnPickListener, ArcSeekBar.
     private ArcSeekBar mPenSizePicker;
     private PreView mPreview;
 
-    //private Paint colorPaint = new Paint();;
-    //private Paint eraserPaint = new Paint();;
-
     private int color;
     private int size;
     private boolean eraser = false;
@@ -56,9 +53,6 @@ public class PenController implements ArcColorPicker.OnPickListener, ArcSeekBar.
 
         mPreview = activity.findViewById(R.id.preview);
         mPreview.init(color, size);
-
-        //buildColorPaint();
-        //buildEraserPaint();
     }
 
     public static PenController getInstance(Activity activity) {

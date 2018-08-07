@@ -874,7 +874,7 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         if(eraser) {
             mPenPaint = new Paint(mEraserPaint);//.set(mEraserPaint);
             mPenPaint.setStrokeWidth(size);
-            mPenPaint.setColor(Color.TRANSPARENT);
+            mPenPaint.setColor(Color.BLACK);
         } else {
             mPenPaint = new Paint(mColorPaint);//.set(mColorPaint);
             mPenPaint.setStrokeWidth(size);

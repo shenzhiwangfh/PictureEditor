@@ -22,6 +22,7 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
     private DrawView mDrawView;
 
     private ImageView mSave;
+    private ImageView mShare;
     private ImageView mBack;
     private ImageView mForward;
 
@@ -42,12 +43,14 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
         mCornerLayout.setOnModeListener(this);
 
         mSave = findViewById(R.id.save);
+        mShare = findViewById(R.id.share);
         mBack = findViewById(R.id.back);
         mForward = findViewById(R.id.forward);
 
         mBack.setEnabled(false);
         mForward.setEnabled(false);
         mSave.setOnClickListener(this);
+        mShare.setOnClickListener(this);
         mBack.setOnClickListener(this);
         mForward.setOnClickListener(this);
 
@@ -93,6 +96,8 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
             case R.id.save:
                 mDrawView.goSave();
                 break;
+            case R.id.share:
+                break;
             case R.id.back:
                 mDrawView.goBack();
                 break;
@@ -110,6 +115,12 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
                 break;
             case 1: //pen
                 mDrawView.setMode(0x20);
+                break;
+            case 2: //mosaic
+                mDrawView.setMode(0x40);
+                break;
+            case 3: //text
+                mDrawView.setMode(0x80);
                 break;
         }
     }

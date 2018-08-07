@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="picture_left_padding">32dp</dimen>
-    <dimen name="picture_top_padding">48dp</dimen>
+    <dimen name="picture_top_padding">24dp</dimen>
     <dimen name="picture_right_padding">32dp</dimen>
     <dimen name="picture_bottom_padding">72dp</dimen>
 

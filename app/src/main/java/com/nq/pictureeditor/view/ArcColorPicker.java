@@ -22,7 +22,7 @@ import com.nq.pictureeditor.R;
 public class ArcColorPicker extends View {
 
     private final static String TAG = "ArcColorPicker";
-    private final static int SelectedEdge = 3;
+    private final static int SelectedEdge = 6;
 
     private final static int TOUCH_NULL = 0;
     private final static int TOUCH_COLOR = 1;
@@ -219,11 +219,14 @@ public class ArcColorPicker extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
+        float x = event.getX();
+        float y = event.getY();
+
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 touchMode = TOUCH_NULL;
-                downX = event.getX();
-                downY = event.getY();
+                downX = x;
+                downY = y;
 
                 for (int i = 0; i < count; i++) {
                     if (ViewUtils.contain(colorPoints[i], colorRadius, downX, downY, 10)) {
@@ -238,8 +241,6 @@ public class ArcColorPicker extends View {
             }
             break;
             case MotionEvent.ACTION_MOVE: {
-                float x = event.getX();
-                float y = event.getY();
                 float inner = radius - colorRadius;
                 float outer = radius + colorRadius;
 
@@ -267,7 +268,12 @@ public class ArcColorPicker extends View {
             }
             break;
         }
-        return (touchMode == TOUCH_COLOR);
+        return touchEdge(x, y);
+    }
+
+    private boolean touchEdge(float x, float y) {
+        return !ViewUtils.contain(rootPoint, colorRadius, x, y, 30) &&
+                ViewUtils.contain(rootPoint, radius, x, y, 0);
     }
 
     private int position2index(float x, float y) {

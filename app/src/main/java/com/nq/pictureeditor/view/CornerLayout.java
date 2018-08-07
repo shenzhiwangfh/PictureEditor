@@ -264,8 +264,6 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
                 View child = getChildAt(i);
                 child.setVisibility(View.GONE);
             }
-        } else {
-
         }
 
         invalidate();
