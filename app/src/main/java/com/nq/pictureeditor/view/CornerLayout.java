@@ -24,7 +24,7 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
 
     private final static String TAG = "CornerLayout";
 
-    private final static float EDGE = 3;
+    private final static float EDGE = 6;
     private final static float TOUCH_EDGE = 60;
 
     private int itemRadius;
@@ -97,6 +97,24 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
         setLongClickable(true);
     }
 
+    public void init() {
+        show();
+    }
+
+    private void show() {
+        for (int i = 0; i < mChildCount; i++) {
+            View child = getChildAt(i);
+            child.setVisibility((mIndex == i) ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void hide() {
+        for (int i = 0; i < mChildCount; i++) {
+            View child = getChildAt(i);
+            child.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -134,10 +152,10 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
 
         mRootPoint.x = getPaddingStart() + itemRadius;
         mRootPoint.y = size - getPaddingBottom() - itemRadius;
-        mRootRectF.set(mRootPoint.x - itemRadius,
-                mRootPoint.y - itemRadius,
-                mRootPoint.x + itemRadius,
-                mRootPoint.y + itemRadius);
+        mRootRectF.set(mRootPoint.x - itemRadius + 20,
+                mRootPoint.y - itemRadius + 20,
+                mRootPoint.x + itemRadius - 20,
+                mRootPoint.y + itemRadius - 20);
     }
 
     private int measureWidth(int defaultWidth, int measureSpec) {
@@ -231,6 +249,9 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
+        mIndex = (mIndex + 1) % mChildCount;
+        show();
+        if(l != null) l.onChange(mIndex);
         return false;
     }
 
@@ -248,22 +269,18 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         if (velocityX > 50f && velocityY > 50f) {
             mIndex = (mIndex + 1) % mChildCount;
+            show();
             if(l != null) l.onChange(mIndex);
         } else if (velocityX < -50f && velocityY < -50f) {
             mIndex = (mIndex - 1 + mChildCount) % mChildCount;
+            show();
             if(l != null) l.onChange(mIndex);
         } else if (velocityX > 50f && velocityY < -50f) {
             open = true;
-            for (int i = 0; i < mChildCount; i++) {
-                View child = getChildAt(i);
-                child.setVisibility(View.VISIBLE);
-            }
+            show();
         } else if (velocityX < -50f && velocityY > 50f) {
             open = false;
-            for (int i = 0; i < mChildCount; i++) {
-                View child = getChildAt(i);
-                child.setVisibility(View.GONE);
-            }
+            hide();
         }
 
         invalidate();

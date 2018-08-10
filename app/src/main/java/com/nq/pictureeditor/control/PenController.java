@@ -4,9 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 
@@ -14,7 +11,7 @@ import com.nq.pictureeditor.R;
 import com.nq.pictureeditor.view.ArcColorPicker;
 import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.OnShowListener;
-import com.nq.pictureeditor.view.PreView;
+import com.nq.pictureeditor.view.Preview;
 
 public class PenController implements ArcColorPicker.OnPickListener, ArcSeekBar.OnSlideListener, OnShowListener {
 
@@ -27,7 +24,7 @@ public class PenController implements ArcColorPicker.OnPickListener, ArcSeekBar.
 
     private ArcColorPicker mPenPicker;
     private ArcSeekBar mPenSizePicker;
-    private PreView mPreview;
+    private Preview mPreview;
 
     private int color;
     private int size;
@@ -44,12 +41,12 @@ public class PenController implements ArcColorPicker.OnPickListener, ArcSeekBar.
         mPenSizePicker.setOnSlideListener(this);
         mPenSizePicker.setOnShowListener(this);
 
-        int index = mPenPicker.getDefauleValue();
+        int index = 0;//mPenPicker.getDefauleValue();
         TypedArray array = mContext.getResources().obtainTypedArray(R.array.pen_colors);
         int resId = array.getResourceId(index, 0);
         array.recycle();
         color = mContext.getResources().getColor(resId, null);
-        size = mPenSizePicker.getDefaultValue();
+        size = mPenSizePicker.getDefaultSize();
 
         mPreview = activity.findViewById(R.id.preview);
         mPreview.init(color, size);

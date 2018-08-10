@@ -30,14 +30,14 @@ public class ArcColorPicker extends View {
     private int radius;
     private int colorRadius;
     private int[] colors;
-    private int[] values;
+    //private int[] values;
     private int defauleValue;
     private int count;
 
     private PointF rootPoint = new PointF();
     private PointF colorPoints[];// = new PointF[];
     private RectF imageRectF = new RectF();
-    private Rect bitmapRect = new Rect();
+    //private Rect bitmapRect = new Rect();
 
     private Paint mColorPaint;
 
@@ -47,7 +47,7 @@ public class ArcColorPicker extends View {
     private int mIndex = 0;
 
     public interface OnPickListener {
-        void onPick(View view, int resId);
+        void onPick(View view, int color);
     }
 
     private OnPickListener pickListener;
@@ -55,6 +55,7 @@ public class ArcColorPicker extends View {
 
     public void setOnPickListener(OnPickListener onPickListener) {
         pickListener = onPickListener;
+        //pickListener.onPick(this, defauleValue);
     }
 
     public void setOnShowListener(OnShowListener onShowListener) {
@@ -71,15 +72,17 @@ public class ArcColorPicker extends View {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ArcColorPicker);
         radius = a.getDimensionPixelOffset(R.styleable.ArcColorPicker_picker_radius, 200);
         colorRadius = a.getDimensionPixelOffset(R.styleable.ArcColorPicker_color_radius, 20);
-        mIndex = defauleValue = a.getInteger(R.styleable.ArcColorPicker_default_color, 0);
+        defauleValue = a.getColor(R.styleable.ArcColorPicker_default_color, 0);
 
+        /*
         int valuesResId = a.getResourceId(R.styleable.ArcColorPicker_values, 0);
         if (valuesResId == 0) {
             throw new IllegalArgumentException("ArcColorPicker: error - colors is not specified");
         }
         values = a.getResources().getIntArray(valuesResId);
+        */
 
-        valuesResId = a.getResourceId(R.styleable.ArcColorPicker_colors, 0);
+        int valuesResId = a.getResourceId(R.styleable.ArcColorPicker_colors, 0);
         if (valuesResId == 0) {
             throw new IllegalArgumentException("ArcColorPicker: error - colors is not specified");
         }
@@ -87,7 +90,10 @@ public class ArcColorPicker extends View {
         TypedArray array = a.getResources().obtainTypedArray(valuesResId);
         colors = new int[array.length()];
         for (int i = 0; i < array.length(); i++) {
-            colors[i] = array.getResourceId(i, 0);
+            int resId = array.getResourceId(i, 0);
+            colors[i] = a.getResources().getColor(resId, null);
+
+            if(defauleValue == colors[i]) mIndex = i;
         }
         array.recycle();
 
@@ -189,19 +195,21 @@ public class ArcColorPicker extends View {
                 canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius + SelectedEdge, mColorPaint);
             }
 
-            if (values[i] == 0) {
-                int color = getResources().getColor(colors[i], null);
-                if (color == Color.WHITE) {
-                    mColorPaint.setColor(Color.BLACK);
-                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
+            //if (values[i] == 0) {
+            int color = colors[i];//getResources().getColor(colors[i], null);
+            if (color == Color.WHITE) {
+                mColorPaint.setColor(Color.BLACK);
+                canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
 
-                    mColorPaint.setColor(color);
-                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius - SelectedEdge, mColorPaint);
-                } else {
-                    mColorPaint.setColor(color);
-                    canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
-                }
-            } else if (values[i] == 1) {
+                mColorPaint.setColor(color);
+                canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius - SelectedEdge, mColorPaint);
+            } else {
+                mColorPaint.setColor(color);
+                canvas.drawCircle(colorPoints[i].x, colorPoints[i].y, colorRadius, mColorPaint);
+            }
+            //}
+            /*
+            else if (values[i] == 1) {
                 BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(colors[i], null);
                 if (drawable != null) {
                     mColorPaint.setColor(Color.BLACK);
@@ -213,6 +221,7 @@ public class ArcColorPicker extends View {
                     canvas.drawBitmap(bitmap, bitmapRect, imageRectF, mColorPaint);
                 }
             }
+            */
         }
     }
 
@@ -310,7 +319,7 @@ public class ArcColorPicker extends View {
         imageRectF.set(left, top, right, bottom);
     }
 
-    public int getDefauleValue() {
+    public int getDefauleColor() {
         return defauleValue;
     }
 }

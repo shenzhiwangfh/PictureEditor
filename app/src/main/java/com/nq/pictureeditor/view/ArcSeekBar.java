@@ -229,7 +229,7 @@ public class ArcSeekBar extends View {
         return minValue;
     }
 
-    public int getDefaultValue() {
+    public int getDefaultSize() {
         return defaultValue;
     }
 }

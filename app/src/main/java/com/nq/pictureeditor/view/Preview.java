@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class PreView extends View {
+public class Preview extends View {
 
     private final static String TAG = "PreView";
     private final int COLOR_SIZE = 128;
@@ -21,11 +21,11 @@ public class PreView extends View {
 
     private boolean pen = true;
 
-    public PreView(Context context) {
+    public Preview(Context context) {
         this(context, null);
     }
 
-    public PreView(Context context, @Nullable AttributeSet attrs) {
+    public Preview(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 

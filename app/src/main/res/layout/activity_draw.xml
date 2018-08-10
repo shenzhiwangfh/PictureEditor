@@ -17,48 +17,48 @@
         android:id="@+id/control_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:padding="10dp">
 
         <ImageView
             android:id="@+id/back"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginEnd="5dp"
             android:layout_gravity="center"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/item_background"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_back"
-            android:background="@drawable/item_background"/>
+            android:src="@drawable/ic_back" />
 
         <ImageView
             android:id="@+id/forward"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginEnd="5dp"
             android:layout_gravity="center"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/item_background"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_forward"
-            android:background="@drawable/item_background"/>
+            android:src="@drawable/ic_forward" />
 
         <ImageView
             android:id="@+id/share"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginEnd="5dp"
             android:layout_gravity="center"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/item_background"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_share"
-            android:background="@drawable/item_background"/>
+            android:src="@drawable/ic_share" />
 
         <ImageView
             android:id="@+id/save"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_gravity="center"
+            android:background="@drawable/item_background"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_save"
-            android:background="@drawable/item_background"/>
+            android:src="@drawable/ic_save" />
     </LinearLayout>
 
     <com.nq.pictureeditor.view.CornerLayout
@@ -76,12 +76,13 @@
         <View
             android:id="@+id/clip"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <RelativeLayout
             android:id="@+id/pen"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
             <com.nq.pictureeditor.view.ArcColorPicker
                 android:id="@+id/pen_color"
@@ -93,9 +94,9 @@
                 android:padding="8dp"
                 app:color_radius="10dp"
                 app:colors="@array/pen_colors"
-                app:values="@array/pen_values"
-                app:default_color="@integer/pen_default_color"
-                app:picker_radius="120dp" />
+                app:default_color="@color/black"
+                app:picker_radius="120dp"
+                app:values="@array/pen_values" />
 
             <com.nq.pictureeditor.view.ArcSeekBar
                 android:id="@+id/pen_size"
@@ -106,28 +107,36 @@
                 android:padding="12dp"
                 app:arc_radius="80dp"
                 app:arc_width="4dp"
+                app:default_value="@integer/pen_default_size"
                 app:max_value="@integer/pen_max_size"
                 app:min_value="@integer/pen_min_size"
-                app:slider_radius="10dp"
-                app:default_value="@integer/pen_default_size" />
+                app:slider_radius="10dp" />
         </RelativeLayout>
 
         <View
-            android:id="@+id/mosaic"
+            android:id="@+id/mosaics"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
         <View
             android:id="@+id/text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
     </com.nq.pictureeditor.view.CornerLayout>
 
-    <com.nq.pictureeditor.view.PreView
+    <com.nq.pictureeditor.view.Preview
         android:id="@+id/preview"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone" />
+
+    <com.nq.pictureeditor.view.MosaicsView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/mosaics_view"
         android:visibility="gone"/>
 </RelativeLayout>

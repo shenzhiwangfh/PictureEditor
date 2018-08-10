@@ -11,7 +11,7 @@
         <attr name="color_radius" format="dimension" />
         <attr name="colors" format="reference" />
         <attr name="values" format="integer" />
-        <attr name="default_color" format="integer" />
+        <attr name="default_color" format="color" />
     </declare-styleable>
 
     <declare-styleable name="ArcSeekBar">

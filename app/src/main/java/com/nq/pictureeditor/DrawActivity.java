@@ -1,6 +1,8 @@
 package com.nq.pictureeditor;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
@@ -8,18 +10,29 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.nq.pictureeditor.control.PenController;
-import com.nq.pictureeditor.control.PenInterface;
+import com.nq.pictureeditor.mode.ClipMode;
+import com.nq.pictureeditor.mode.EditMode;
 import com.nq.pictureeditor.mode.PenMode;
+import com.nq.pictureeditor.view.ArcColorPicker;
+import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.CornerLayout;
 import com.nq.pictureeditor.view.DrawView;
+import com.nq.pictureeditor.view.MosaicsView;
+import com.nq.pictureeditor.view.OnShowListener;
+import com.nq.pictureeditor.view.Preview;
+import com.nq.pictureeditor.view.ViewUtils;
 
-
-public class DrawActivity extends AppCompatActivity implements DrawInterface, PenInterface, View.OnClickListener, CornerLayout.OnModeListener {
+public class DrawActivity extends AppCompatActivity
+        implements View.OnClickListener,
+        DrawInterface, OnShowListener,
+        ArcColorPicker.OnPickListener,
+        ArcSeekBar.OnSlideListener,
+        CornerLayout.OnModeListener {
 
     private final static String TAG = "DrawActivity";
 
     private DrawView mDrawView;
+    private Preview mPreview;
 
     private ImageView mSave;
     private ImageView mShare;
@@ -27,9 +40,15 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
     private ImageView mForward;
 
     private CornerLayout mCornerLayout;
+    private ArcColorPicker mColorPicker;
+    private ArcSeekBar mSeekBar;
 
-    private PenController penController;
-    private PenMode mPenMode = new PenMode();
+    //private PenController penController;
+
+    private EditMode mClipMode = new ClipMode();
+    private EditMode mPenMode = new PenMode();
+    private EditMode mMosoicMode = new PenMode();
+    private EditMode mTextMode = new PenMode();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,28 +58,25 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
         BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
         Bitmap mBitmap = bitmapDrawable.getBitmap();
 
-        mCornerLayout = findViewById(R.id.control);
-        mCornerLayout.setOnModeListener(this);
+        //Bitmap mosaicsBitmap = ViewUtils.BitmapMosaic(mBitmap, 32);
 
-        mSave = findViewById(R.id.save);
-        mShare = findViewById(R.id.share);
-        mBack = findViewById(R.id.back);
-        mForward = findViewById(R.id.forward);
-
-        mBack.setEnabled(false);
-        mForward.setEnabled(false);
-        mSave.setOnClickListener(this);
-        mShare.setOnClickListener(this);
-        mBack.setOnClickListener(this);
-        mForward.setOnClickListener(this);
+        initActions();
+        initControllors();
 
         mDrawView = findViewById(R.id.main);
         mDrawView.initBitmap(mBitmap);
         mDrawView.setFinishDraw(this);
 
-        penController = PenController.getInstance(this);
-        penController.setPenInterface(this);
-        penController.initPen();
+        mPreview = findViewById(R.id.preview);
+
+        //penController = PenController.getInstance(this);
+        //penController.setPenInterface(this);
+        //penController.initPen();
+
+        //MosaicsView mosaics = findViewById(R.id.mosaics_view);
+        //Bitmap mosaicBmp = ViewUtils.BitmapMosaic(mBitmap, 40);
+        //mosaics.initBitmap(mBitmap);
+        //mosaics.setImageBitmap(mBitmap);
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
     }
@@ -76,6 +92,32 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
+    private void initActions() {
+        mSave = findViewById(R.id.save);
+        mShare = findViewById(R.id.share);
+        mBack = findViewById(R.id.back);
+        mForward = findViewById(R.id.forward);
+
+        mBack.setEnabled(false);
+        mForward.setEnabled(false);
+        mSave.setOnClickListener(this);
+        mShare.setOnClickListener(this);
+        mBack.setOnClickListener(this);
+        mForward.setOnClickListener(this);
+    }
+
+    private void initControllors() {
+        mCornerLayout = findViewById(R.id.control);
+        mColorPicker = findViewById(R.id.pen_color);
+        mSeekBar = findViewById(R.id.pen_size);
+
+        mCornerLayout.setOnModeListener(this);
+        mColorPicker.setOnPickListener(this);
+        mColorPicker.setOnShowListener(this);
+        mSeekBar.setOnSlideListener(this);
+        mSeekBar.setOnShowListener(this);
     }
 
     @Override
@@ -109,6 +151,8 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
 
     @Override
     public void onChange(int mode) {
+        mDrawView.setMode(mode);
+        /*
         switch (mode) {
             case 0: //clip
                 mDrawView.setMode(0x10);
@@ -116,17 +160,28 @@ public class DrawActivity extends AppCompatActivity implements DrawInterface, Pe
             case 1: //pen
                 mDrawView.setMode(0x20);
                 break;
-            case 2: //mosaic
+            case 2: //mosaics
                 mDrawView.setMode(0x40);
                 break;
             case 3: //text
                 mDrawView.setMode(0x80);
                 break;
         }
+        */
     }
 
     @Override
-    public void setPaint(int color, int size, boolean eraser) {
-        mDrawView.setPen(color, size, eraser);
+    public void onPick(View view, int color) {
+        mDrawView.setPenColor(color);
+    }
+
+    @Override
+    public void onSlide(View view, int value) {
+        mDrawView.setPenSize(value);
+    }
+
+    @Override
+    public void onShow(View view, boolean show) {
+        mPreview.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }
