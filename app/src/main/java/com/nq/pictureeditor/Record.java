@@ -1,4 +1,4 @@
-package com.nq.pictureeditor.record;
+package com.nq.pictureeditor;
 
 import java.io.Serializable;
 
