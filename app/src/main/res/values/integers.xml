@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="pen_min_size">16</integer>
-    <integer name="pen_max_size">72</integer>
+    <integer name="pen_max_size">108</integer>
     <integer name="pen_default_size">24</integer>
 
     <integer name="pen_default_color">7</integer>

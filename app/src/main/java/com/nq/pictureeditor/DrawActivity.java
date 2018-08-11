@@ -1,8 +1,6 @@
 package com.nq.pictureeditor;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
@@ -17,10 +15,8 @@ import com.nq.pictureeditor.view.ArcColorPicker;
 import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.CornerLayout;
 import com.nq.pictureeditor.view.DrawView;
-import com.nq.pictureeditor.view.MosaicsView;
 import com.nq.pictureeditor.view.OnShowListener;
 import com.nq.pictureeditor.view.Preview;
-import com.nq.pictureeditor.view.ViewUtils;
 
 public class DrawActivity extends AppCompatActivity
         implements View.OnClickListener,
@@ -58,13 +54,16 @@ public class DrawActivity extends AppCompatActivity
         BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
         Bitmap mBitmap = bitmapDrawable.getBitmap();
 
-        //Bitmap mosaicsBitmap = ViewUtils.BitmapMosaic(mBitmap, 32);
-
         initActions();
         initControllors();
 
+        int size = mSeekBar.getDefaultSize();
+        int color = mColorPicker.getDefauleColor();
+
         mDrawView = findViewById(R.id.main);
         mDrawView.initBitmap(mBitmap);
+        mDrawView.setPenSize(size);
+        mDrawView.setPenColor(color);
         mDrawView.setFinishDraw(this);
 
         mPreview = findViewById(R.id.preview);
@@ -72,11 +71,6 @@ public class DrawActivity extends AppCompatActivity
         //penController = PenController.getInstance(this);
         //penController.setPenInterface(this);
         //penController.initPen();
-
-        //MosaicsView mosaics = findViewById(R.id.mosaics_view);
-        //Bitmap mosaicBmp = ViewUtils.BitmapMosaic(mBitmap, 40);
-        //mosaics.initBitmap(mBitmap);
-        //mosaics.setImageBitmap(mBitmap);
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
     }
@@ -152,22 +146,6 @@ public class DrawActivity extends AppCompatActivity
     @Override
     public void onChange(int mode) {
         mDrawView.setMode(mode);
-        /*
-        switch (mode) {
-            case 0: //clip
-                mDrawView.setMode(0x10);
-                break;
-            case 1: //pen
-                mDrawView.setMode(0x20);
-                break;
-            case 2: //mosaics
-                mDrawView.setMode(0x40);
-                break;
-            case 3: //text
-                mDrawView.setMode(0x80);
-                break;
-        }
-        */
     }
 
     @Override

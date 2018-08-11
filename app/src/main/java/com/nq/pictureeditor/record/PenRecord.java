@@ -1,4 +1,4 @@
-package com.nq.pictureeditor;
+package com.nq.pictureeditor.record;
 
 import android.graphics.Matrix;
 import android.graphics.Paint;
