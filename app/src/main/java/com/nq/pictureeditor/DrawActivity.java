@@ -63,8 +63,13 @@ public class DrawActivity extends AppCompatActivity
         initActions();
         initControllors();
 
+        int size = mSeekBar.getDefaultSize();
+        int color = mColorPicker.getDefauleColor();
+
         mDrawView = findViewById(R.id.main);
         mDrawView.initBitmap(mBitmap);
+        mDrawView.setPenSize(size);
+        mDrawView.setPenColor(color);
         mDrawView.setFinishDraw(this);
 
         mPreview = findViewById(R.id.preview);

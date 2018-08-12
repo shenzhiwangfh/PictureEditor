@@ -19,6 +19,18 @@ public class ClipMode extends EditMode {
     public int clipMode = MODE_NORMAL;
     */
 
+    public final static int MODE_NORMAL = 0x10;
+    public final static int MODE_PICTURE = 0x11;
+    public final static int MODE_SCALE = 0x12;
+    public final static int MODE_LT_ICON = 0x13;
+    public final static int MODE_RT_ICON = 0x14;
+    public final static int MODE_LB_ICON = 0x15;
+    public final static int MODE_RB_ICON = 0x16;
+    public final static int MODE_L_LINE = 0x17;
+    public final static int MODE_R_LINE = 0x18;
+    public final static int MODE_T_LINE = 0x19;
+    public final static int MODE_B_LINE = 0x1A;
+
     public RectF pictureRect;
     public RectF clipPictureRect;
 
