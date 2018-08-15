@@ -304,4 +304,10 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
         canvas.drawBitmap(eraserBmp, eraserBmpRect, eraserRect, paint);
     }
     */
+
+    public void setIndex(int index) {
+        mIndex = index;
+        show();
+        //invalidate();
+    }
 }

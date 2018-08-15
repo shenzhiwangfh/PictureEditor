@@ -45,10 +45,10 @@ public class DrawActivity extends AppCompatActivity
 
     //private PenController penController;
 
-    private EditMode mClipMode = new ClipMode();
-    private EditMode mPenMode = new PenMode();
-    private EditMode mMosoicMode = new PenMode();
-    private EditMode mTextMode = new PenMode();
+    //private EditMode mClipMode = new ClipMode();
+    //private EditMode mPenMode = new PenMode();
+    //private EditMode mMosoicMode = new PenMode();
+    //private EditMode mTextMode = new PenMode();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +57,6 @@ public class DrawActivity extends AppCompatActivity
 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
         Bitmap mBitmap = bitmapDrawable.getBitmap();
-
-        //Bitmap mosaicsBitmap = ViewUtils.BitmapMosaic(mBitmap, 32);
 
         initActions();
         initControllors();
@@ -71,17 +69,8 @@ public class DrawActivity extends AppCompatActivity
         mDrawView.setPenSize(size);
         mDrawView.setPenColor(color);
         mDrawView.setFinishDraw(this);
-
+        mDrawView.setMode(EditMode.MODE_CLIP);
         mPreview = findViewById(R.id.preview);
-
-        //penController = PenController.getInstance(this);
-        //penController.setPenInterface(this);
-        //penController.initPen();
-
-        //MosaicsView mosaics = findViewById(R.id.mosaics_view);
-        //Bitmap mosaicBmp = ViewUtils.BitmapMosaic(mBitmap, 40);
-        //mosaics.initBitmap(mBitmap);
-        //mosaics.setImageBitmap(mBitmap);
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
     }
@@ -146,10 +135,10 @@ public class DrawActivity extends AppCompatActivity
             case R.id.share:
                 break;
             case R.id.back:
-                mDrawView.goBack();
+                mCornerLayout.setIndex(mDrawView.goBack());
                 break;
             case R.id.forward:
-                mDrawView.goForward();
+                mCornerLayout.setIndex(mDrawView.goForward());
                 break;
         }
     }
@@ -157,22 +146,6 @@ public class DrawActivity extends AppCompatActivity
     @Override
     public void onChange(int mode) {
         mDrawView.setMode(mode);
-        /*
-        switch (mode) {
-            case 0: //clip
-                mDrawView.setMode(0x10);
-                break;
-            case 1: //pen
-                mDrawView.setMode(0x20);
-                break;
-            case 2: //mosaics
-                mDrawView.setMode(0x40);
-                break;
-            case 3: //text
-                mDrawView.setMode(0x80);
-                break;
-        }
-        */
     }
 
     @Override
