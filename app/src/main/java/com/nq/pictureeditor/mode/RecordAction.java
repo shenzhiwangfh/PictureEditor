@@ -1,7 +1,5 @@
 package com.nq.pictureeditor.mode;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 public class RecordAction {
@@ -61,24 +59,17 @@ public class RecordAction {
 
     private void add(EditMode mode) {
         index++;
-        for (int i = index; i < records.size(); i++) {
-            records.remove(i);
-        }
-
-        Log.e(TAG, "index=" + index + ",getMode=" + mode.getMode());
-        records.add(mode);
+        replace(mode);
     }
 
     private void replace(EditMode mode) {
-        //index++;
         for (int i = index; i < records.size(); i++) {
             records.remove(i);
         }
-
-        Log.e(TAG, "index=" + index + ",getMode=" + mode.getMode());
         records.add(mode);
     }
 
+    /*
     private ClipMode getLastClipMode() {
         ClipMode clipMode = null;
         for (int i = (records.size() - 1); i >= 0; i--) {
@@ -89,6 +80,7 @@ public class RecordAction {
         }
         return clipMode;
     }
+    */
 
     public void setChanged(boolean changed) {
         this.changed = changed;

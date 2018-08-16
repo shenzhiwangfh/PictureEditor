@@ -16,17 +16,21 @@ public class ClipMode extends EditMode {
     public final static int MODE_T_LINE = 0x19;
     public final static int MODE_B_LINE = 0x1A;
 
-    public RectF pictureRect;
-    public RectF clipPictureRect;
-
-    public Matrix M;
-
     public boolean status = true;
 
+    public ClipMode(RectF rect, RectF clipRect, Matrix m) {
+        super(rect, clipRect, m);
+    }
+
     public ClipMode(RectF rect, RectF clipRect, Matrix m, boolean status) {
-        pictureRect = new RectF(rect);
-        clipPictureRect = new RectF(clipRect);
-        M = new Matrix(m);
+        //pictureRect = new RectF(rect);
+        //clipPictureRect = new RectF(clipRect);
+        //M = new Matrix(m);
+        super(rect, clipRect, m);
+        this.status = status;
+    }
+
+    public void setStatus(boolean status) {
         this.status = status;
     }
 

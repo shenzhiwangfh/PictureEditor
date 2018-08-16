@@ -8,10 +8,10 @@ import android.graphics.RectF;
 public class PenMode extends EditMode {
     public Path path;
     public Paint paint;
-
     public RectF clip;
 
-    public PenMode(Path path, Paint paint, RectF clip) {
+    public PenMode(RectF rect, RectF clipRect, Matrix m, Path path, Paint paint, RectF clip) {
+        super(rect, clipRect, m);
         this.path = new Path(path);
         this.paint = new Paint(paint);
         this.clip = new RectF(clip);
@@ -19,6 +19,6 @@ public class PenMode extends EditMode {
 
     @Override
     public int getMode() {
-        return MODE_PEN;
+        return 0;
     }
 }

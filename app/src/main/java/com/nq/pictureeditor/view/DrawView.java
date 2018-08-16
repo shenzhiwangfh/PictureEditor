@@ -21,8 +21,8 @@ import android.view.View;
 
 import com.nq.pictureeditor.mode.ClipMode;
 import com.nq.pictureeditor.mode.ModeLoopInterface;
-import com.nq.pictureeditor.mode.MosaicsMode;
-import com.nq.pictureeditor.mode.PenMode;
+import com.nq.pictureeditor.mode.MosaicsPenMode;
+import com.nq.pictureeditor.mode.ColorPenMode;
 import com.nq.pictureeditor.DrawInterface;
 import com.nq.pictureeditor.R;
 import com.nq.pictureeditor.Utils;
@@ -200,7 +200,7 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         matrix();
 
         //editMode = EditMode.MODE_CLIP;
-        //mRecordAction.addRecord(new ClipMode(pictureRect, clipPictureRect, M, true), true);
+        mRecordAction.addRecord(new ClipMode(pictureRect, clipPictureRect, M, true), true);
     }
 
     private void setPrePictureRect() {
@@ -607,7 +607,7 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
                         //mDrawing = false;
                         //mChanged = true;
                         //addRecord(EditMode.MODE_PEN);
-                        mRecordAction.addRecord(new PenMode(mPenPath, mColorPaint, clipBitmapRect), false);
+                        mRecordAction.addRecord(new ColorPenMode(pictureRect, clipPictureRect, M, mPenPath, mColorPaint, clipBitmapRect), false);
 
                         //redrawBitmap();
                         invalidateBtn();
@@ -631,7 +631,7 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
                         //mDrawing = false;
                         //mChanged = true;
                         //addRecord(EditMode.MODE_MOSAICS);
-                        mRecordAction.addRecord(new MosaicsMode(mPenPath, mMosaicsPaint, clipBitmapRect), false);
+                        mRecordAction.addRecord(new MosaicsPenMode(pictureRect, clipPictureRect, M, mPenPath, mMosaicsPaint, clipBitmapRect), false);
 
                         //redrawBitmap();
                         invalidateBtn();
@@ -833,14 +833,14 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
             @Override
             public void pickMode(EditMode mode) {
                 if (mode.getMode() == EditMode.MODE_PEN) {
-                    PenMode penMode = (PenMode) mode;
+                    ColorPenMode penMode = (ColorPenMode) mode;
 
                     mDrawCanvas.save();
                     mDrawCanvas.clipRect(penMode.clip);
                     mDrawCanvas.drawPath(penMode.path, penMode.paint);
                     mDrawCanvas.restore();
                 } else if (mode.getMode() == EditMode.MODE_MOSAICS) {
-                    MosaicsMode mosaicsMode = (MosaicsMode) mode;
+                    MosaicsPenMode mosaicsMode = (MosaicsPenMode) mode;
                     int canvasWidth = mDrawCanvas.getWidth();
                     int canvasHeight = mDrawCanvas.getHeight();
                     int layerId = mDrawCanvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
@@ -873,16 +873,18 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         int mode = preEditMode.getMode();
         switch (mode) {
             case EditMode.MODE_CLIP:
-                ClipMode clipMode = (ClipMode) preEditMode;
-                pictureRect.set(clipMode.pictureRect);
-                clipPictureRect.set(clipMode.clipPictureRect);
-                M.set(clipMode.M);
+            case EditMode.MODE_PEN:
+            case EditMode.MODE_MOSAICS:
+                //ClipMode clipMode = (ClipMode) preEditMode;
+                pictureRect.set(preEditMode.pictureRect);
+                clipPictureRect.set(preEditMode.clipPictureRect);
+                M.set(preEditMode.M);
                 setClipBitmapRect();
                 setClipIconRect(0, 0);
                 break;
-            case EditMode.MODE_PEN:
-            case EditMode.MODE_MOSAICS:
-                break;
+            //case EditMode.MODE_PEN:
+            //case EditMode.MODE_MOSAICS:
+            //    break;
         }
 
         editMode = mode;
@@ -899,16 +901,18 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         int mode = nextEditMode.getMode();
         switch (mode) {
             case EditMode.MODE_CLIP:
-                ClipMode clipMode = (ClipMode) nextEditMode;
-                pictureRect.set(clipMode.pictureRect);
-                clipPictureRect.set(clipMode.clipPictureRect);
-                M.set(clipMode.M);
+            case EditMode.MODE_PEN:
+            case EditMode.MODE_MOSAICS:
+                //ClipMode clipMode = (ClipMode) nextEditMode;
+                //pictureRect.set(nextEditMode.pictureRect);
+                //clipPictureRect.set(nextEditMode.clipPictureRect);
+                M.set(nextEditMode.M);
                 setClipBitmapRect();
                 setClipIconRect(0, 0);
                 break;
-            case EditMode.MODE_PEN:
-            case EditMode.MODE_MOSAICS:
-                break;
+            //case EditMode.MODE_PEN:
+            //case EditMode.MODE_MOSAICS:
+            //    break;
         }
 
         editMode = mode;
@@ -932,6 +936,18 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         }
     }
 
+    public void goShare() {
+        if (draw != null) {
+            redrawBitmap();
+            Bitmap newBitmap = Bitmap.createBitmap(mDrawBitmap,
+                    (int) clipBitmapRect.left,
+                    (int) clipBitmapRect.top,
+                    (int) clipBitmapRect.width(),
+                    (int) clipBitmapRect.height());
+            draw.share(newBitmap);
+        }
+    }
+
     public void setMode(int mode) {
         //if (editMode == EditMode.MODE_CLIP || mode == EditMode.MODE_CLIP) {
         //    ClipMode clipMode = new ClipMode(pictureRect, clipPictureRect, M);
@@ -944,8 +960,8 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         invalidateBtn();
 
         if(editMode == EditMode.MODE_CLIP) {
-            ClipMode clipMode = new ClipMode(pictureRect, clipPictureRect, M, true);
-            mRecordAction.addRecord(clipMode, false);
+            //ClipMode clipMode = new ClipMode(pictureRect, clipPictureRect, M, true);
+            //mRecordAction.addRecord(clipMode, false);
         } else if (editMode == EditMode.MODE_MOSAICS) {
             if (mMosaicBmp != null) mMosaicBmp.recycle();
             mMosaicBmp = ViewUtils.BitmapMosaic(mDrawBitmap, 64);

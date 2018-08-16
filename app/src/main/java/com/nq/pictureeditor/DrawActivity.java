@@ -45,11 +45,6 @@ public class DrawActivity extends AppCompatActivity
 
     //private PenController penController;
 
-    //private EditMode mClipMode = new ClipMode();
-    //private EditMode mPenMode = new PenMode();
-    //private EditMode mMosoicMode = new PenMode();
-    //private EditMode mTextMode = new PenMode();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,24 +117,48 @@ public class DrawActivity extends AppCompatActivity
 
     @Override
     public void save(Bitmap newBitmap) {
-        new SaveImageTask(this).execute(newBitmap);
+        new SaveImageTask(this, this).execute(newBitmap);
+    }
+
+    @Override
+    public void share(Bitmap newBitmap) {
+        new ShareImageTask(this, this).execute(newBitmap);
+    }
+
+    @Override
+    public void saved() {
+        mSave.setEnabled(true);
+    }
+
+    @Override
+    public void shared() {
+        mShare.setEnabled(true);
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
         switch (id) {
-            case R.id.save:
+            case R.id.save: {
+                mSave.setEnabled(false);
                 mDrawView.goSave();
-                break;
-            case R.id.share:
-                break;
-            case R.id.back:
-                mCornerLayout.setIndex(mDrawView.goBack());
-                break;
-            case R.id.forward:
-                mCornerLayout.setIndex(mDrawView.goForward());
-                break;
+            }
+            break;
+            case R.id.share: {
+                mShare.setEnabled(false);
+                mDrawView.goShare();
+            }
+            break;
+            case R.id.back: {
+                int mode = mDrawView.goBack();
+                mCornerLayout.setIndex(mode);
+            }
+            break;
+            case R.id.forward: {
+                int mode = mDrawView.goForward();
+                mCornerLayout.setIndex(mode);
+            }
+            break;
         }
     }
 
