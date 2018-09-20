@@ -13,6 +13,10 @@ public abstract class EditMode {
     public RectF clipPictureRect;
     public Matrix M;
 
+    public EditMode() {
+
+    }
+
     public EditMode(RectF rect, RectF clipRect, Matrix m) {
         pictureRect = new RectF(rect);
         clipPictureRect = new RectF(clipRect);
