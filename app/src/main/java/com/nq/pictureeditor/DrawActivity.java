@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,9 +13,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.nq.pictureeditor.control.ModeController;
 import com.nq.pictureeditor.mode.ClipMode;
+import com.nq.pictureeditor.mode.ColorPenMode;
 import com.nq.pictureeditor.mode.EditMode;
+import com.nq.pictureeditor.mode.MosaicsPenMode;
 import com.nq.pictureeditor.mode.PenMode;
+import com.nq.pictureeditor.mode.TextMode;
 import com.nq.pictureeditor.text.TextActivity;
 import com.nq.pictureeditor.view.ArcColorPicker;
 import com.nq.pictureeditor.view.ArcSeekBar;
@@ -25,12 +30,10 @@ import com.nq.pictureeditor.view.OnShowListener;
 import com.nq.pictureeditor.view.Preview;
 import com.nq.pictureeditor.view.ViewUtils;
 
+import java.util.HashMap;
+
 public class DrawActivity extends AppCompatActivity
-        implements View.OnClickListener,
-        DrawInterface, OnShowListener,
-        ArcColorPicker.OnPickListener,
-        ArcSeekBar.OnSlideListener,
-        CornerLayout.OnModeListener {
+        implements View.OnClickListener, OnShowListener {
 
     private final static String TAG = "DrawActivity";
 
@@ -44,9 +47,10 @@ public class DrawActivity extends AppCompatActivity
 
     private CornerLayout mCornerLayout;
     private ArcColorPicker mColorPicker;
-    private ArcSeekBar mSeekBar;
+    private ArcSeekBar mPenSeekBar;
+    private ArcSeekBar mMosaicsSeekBar;
 
-    //private PenController penController;
+    private ModeController mController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +59,13 @@ public class DrawActivity extends AppCompatActivity
 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
         Bitmap mBitmap = bitmapDrawable.getBitmap();
+        mController = new ModeController(this, mBitmap);
 
         initActions();
         initControllors();
 
-        int size = mSeekBar.getDefaultSize();
-        int color = mColorPicker.getDefauleColor();
-
         mDrawView = findViewById(R.id.main);
-        mDrawView.initBitmap(mBitmap);
-        mDrawView.setPenSize(size);
-        mDrawView.setPenColor(color);
-        mDrawView.setFinishDraw(this);
-        mDrawView.setMode(EditMode.MODE_CLIP);
+        mDrawView.setController(mController);
         mPreview = findViewById(R.id.preview);
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
@@ -103,15 +101,21 @@ public class DrawActivity extends AppCompatActivity
     private void initControllors() {
         mCornerLayout = findViewById(R.id.control);
         mColorPicker = findViewById(R.id.pen_color);
-        mSeekBar = findViewById(R.id.pen_size);
+        mPenSeekBar = findViewById(R.id.pen_size);
+        mMosaicsSeekBar = findViewById(R.id.mosaics_size);
 
-        mCornerLayout.setOnModeListener(this);
-        mColorPicker.setOnPickListener(this);
+        ColorPenMode colorPenMode = (ColorPenMode) mController.getEditMode(EditMode.MODE_PEN);
+        MosaicsPenMode mosaicsPenMode = (MosaicsPenMode) mController.getEditMode(EditMode.MODE_MOSAICS);
+
+        mCornerLayout.setOnModeListener(mController);
+        mColorPicker.setOnPickListener(colorPenMode);
         mColorPicker.setOnShowListener(this);
-        mSeekBar.setOnSlideListener(this);
-        mSeekBar.setOnShowListener(this);
+        mPenSeekBar.setOnSlideListener(colorPenMode);
+        mMosaicsSeekBar.setOnSlideListener(mosaicsPenMode);
+        mPenSeekBar.setOnShowListener(this);
     }
 
+    /*
     @Override
     public void finishAction(boolean back, boolean forward) {
         mBack.setEnabled(back);
@@ -137,6 +141,7 @@ public class DrawActivity extends AppCompatActivity
     public void shared() {
         mShare.setEnabled(true);
     }
+    */
 
     @Override
     public void onClick(View v) {
@@ -153,31 +158,16 @@ public class DrawActivity extends AppCompatActivity
             }
             break;
             case R.id.back: {
-                int mode = mDrawView.goBack();
-                mCornerLayout.setIndex(mode);
+                //int mode = mDrawView.goBack();
+                //mCornerLayout.setIndex(mode);
             }
             break;
             case R.id.forward: {
-                int mode = mDrawView.goForward();
-                mCornerLayout.setIndex(mode);
+                //int mode = mDrawView.goForward();
+                //mCornerLayout.setIndex(mode);
             }
             break;
         }
-    }
-
-    @Override
-    public void onChange(int mode) {
-        mDrawView.setMode(mode);
-    }
-
-    @Override
-    public void onPick(View view, int color) {
-        mDrawView.setPenColor(color);
-    }
-
-    @Override
-    public void onSlide(View view, int value) {
-        mDrawView.setPenSize(value);
     }
 
     @Override

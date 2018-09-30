@@ -46,7 +46,7 @@ public class ArcSeekBar extends View {
     private float downX, downY;
 
     public interface OnSlideListener {
-        void onSlide(View view, int value);
+        void onSlide(View view, int size);
     }
 
     private OnSlideListener slideListener;

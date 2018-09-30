@@ -1,24 +1,77 @@
 package com.nq.pictureeditor.mode;
 
-import android.graphics.Matrix;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.RectF;
+import android.view.MotionEvent;
+import android.view.View;
+import android.os.Handler;
 
-public class PenMode extends EditMode {
-    public Path path;
-    public Paint paint;
-    public RectF clip;
+import com.nq.pictureeditor.view.ArcColorPicker;
+import com.nq.pictureeditor.view.ArcSeekBar;
 
-    public PenMode(RectF rect, RectF clipRect, Matrix m, Path path, Paint paint, RectF clip) {
-        super(rect, clipRect, m);
-        this.path = new Path(path);
-        this.paint = new Paint(paint);
-        this.clip = new RectF(clip);
+public class PenMode extends EditMode  implements
+        ArcColorPicker.OnPickListener,
+        ArcSeekBar.OnSlideListener {
+    protected Path mDrawPath = new Path();
+    protected Paint mDrawPaint = new Paint();
+    protected Handler mHandler;
+
+    public static final float PEN_MIN_MOVE = 4.0f;
+
+    public PenMode(Handler handler) {
+        super();
+        mHandler = handler;
+    }
+
+    public PenMode(PenMode o) {
+        super(o);
+        this.mDrawPath.set(o.mDrawPath);
+        this.mDrawPaint.set(o.mDrawPaint);
     }
 
     @Override
     public int getMode() {
-        return 0;
+        return MODE_PEN;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap) {
+        return false;
+    }
+
+    @Override
+    public void turnOn(EditMode clipMode, Bitmap mDrawBitmap) {
+        set(clipMode);
+    }
+
+    @Override
+    public void turnOff() {
+
+    }
+
+    @Override
+    public void redraw(Canvas mDrawCanvas, Bitmap mMosaicBmp) {
+
+    }
+
+    @Override
+    public void onPick(View view, int color) {
+        setColor(color);
+    }
+
+    @Override
+    public void onSlide(View view, int size) {
+        setSize(size);
+    }
+
+    public void setColor(int color) {
+        mDrawPaint.setColor(color);
+    }
+
+    public void setSize(int size) {
+        mDrawPaint.setStrokeWidth(size);
     }
 }

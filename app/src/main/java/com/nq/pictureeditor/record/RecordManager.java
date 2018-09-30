@@ -1,8 +1,11 @@
-package com.nq.pictureeditor.mode;
+package com.nq.pictureeditor.record;
+
+import com.nq.pictureeditor.mode.ClipMode;
+import com.nq.pictureeditor.mode.EditMode;
 
 import java.util.ArrayList;
 
-public class RecordAction {
+public class RecordManager {
 
     private final static String TAG = "DrawView";
 
@@ -10,17 +13,18 @@ public class RecordAction {
     private int index = -1;
     private boolean changed = false;
 
-    public RecordAction() {
+    public RecordManager() {
 
     }
 
-    public void addRecord(EditMode mode, boolean force) {
+    public void addRecord(EditMode record, boolean force) {
         //if(!force || !changed) return;
 
-        switch (mode.getMode()) {
+        switch (record.getMode()) {
             case EditMode.MODE_CLIP:
+                /*
                 if (records.isEmpty()) {
-                    ClipMode nowClipMode = (ClipMode) mode;
+                    ClipMode nowClipMode = (ClipMode) record;
                     //nowClipMode.status = 0;
                     add(nowClipMode);
                 } else {
@@ -49,10 +53,11 @@ public class RecordAction {
                         add(nowClipMode);
                     }
                 }
+                */
                 break;
             case EditMode.MODE_PEN:
             case EditMode.MODE_MOSAICS:
-                add(mode);
+                add(record);
                 break;
         }
     }

@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#80ffff"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/control_bar"
@@ -120,11 +120,26 @@
                 app:slider_radius="10dp" />
         </RelativeLayout>
 
-        <View
+        <RelativeLayout
             android:id="@+id/mosaics"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <com.nq.pictureeditor.view.ArcSeekBar
+                android:id="@+id/mosaics_size"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:padding="12dp"
+                app:arc_radius="80dp"
+                app:arc_width="4dp"
+                app:default_value="@integer/pen_default_size"
+                app:max_value="@integer/pen_max_size"
+                app:min_value="@integer/pen_min_size"
+                app:slider_radius="10dp" />
+        </RelativeLayout>
 
         <View
             android:id="@+id/text"
@@ -142,8 +157,8 @@
         android:visibility="gone" />
 
     <com.nq.pictureeditor.view.MosaicsView
+        android:id="@+id/mosaics_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/mosaics_view"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 </RelativeLayout>
