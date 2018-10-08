@@ -1,36 +1,21 @@
 package com.nq.pictureeditor;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.nq.pictureeditor.control.ModeController;
-import com.nq.pictureeditor.mode.ClipMode;
-import com.nq.pictureeditor.mode.ColorPenMode;
-import com.nq.pictureeditor.mode.EditMode;
-import com.nq.pictureeditor.mode.MosaicsPenMode;
-import com.nq.pictureeditor.mode.PenMode;
-import com.nq.pictureeditor.mode.TextMode;
-import com.nq.pictureeditor.text.TextActivity;
 import com.nq.pictureeditor.view.ArcColorPicker;
 import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.CornerLayout;
 import com.nq.pictureeditor.view.DrawView;
-import com.nq.pictureeditor.view.MosaicsView;
 import com.nq.pictureeditor.view.OnShowListener;
 import com.nq.pictureeditor.view.Preview;
-import com.nq.pictureeditor.view.ViewUtils;
-
-import java.util.HashMap;
 
 public class DrawActivity extends AppCompatActivity
         implements View.OnClickListener, OnShowListener {

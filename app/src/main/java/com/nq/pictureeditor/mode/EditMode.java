@@ -39,6 +39,7 @@ public abstract class EditMode implements Serializable {
     public float picOffsetX = 0.0f, picOffsetY = 0.0f;
 
     public Paint mDrawPaint;
+    public int index = -1;
 
     public EditMode() {
         mDrawPaint = new Paint(/*Paint.ANTI_ALIAS_FLAG*/);
@@ -66,7 +67,7 @@ public abstract class EditMode implements Serializable {
 
     public abstract int getMode();
 
-    public abstract boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap);
+    public abstract boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas);
 
     public abstract void turnOn(EditMode clipMode);
 

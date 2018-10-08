@@ -4,5 +4,5 @@ import com.nq.pictureeditor.mode.EditMode;
 
 public interface ModeLoopInterface {
 
-    void pickMode(EditMode mode);
+    boolean pickMode(EditMode mode);
 }

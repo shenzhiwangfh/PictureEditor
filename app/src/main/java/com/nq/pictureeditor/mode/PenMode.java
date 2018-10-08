@@ -39,7 +39,7 @@ public class PenMode extends EditMode  implements
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap) {
+    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas) {
         return false;
     }
 

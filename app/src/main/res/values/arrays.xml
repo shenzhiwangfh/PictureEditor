@@ -31,9 +31,9 @@
 
     <integer-array name="mode_imgs">
         <item>@drawable/ic_menu_crop</item>
-        <item>@drawable/ic_menu_pen</item>
-        <item>@drawable/ic_menu_share</item>
-        <item>@drawable/ic_menu_save</item>
+        <item>@drawable/ic_menu_color_pen</item>
+        <item>@drawable/ic_menu_mosaics_pen</item>
+        <item>@drawable/ic_menu_text</item>
     </integer-array>
 
     <integer-array name="mode_values">

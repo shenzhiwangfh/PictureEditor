@@ -52,7 +52,7 @@ public class ColorPenMode extends PenMode {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap) {
+    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas) {
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN: {

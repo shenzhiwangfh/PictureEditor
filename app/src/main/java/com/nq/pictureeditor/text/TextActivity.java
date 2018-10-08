@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.nq.pictureeditor.R;
+import com.nq.pictureeditor.mode.TextMode;
 
 public class TextActivity extends Activity implements View.OnClickListener {
 
@@ -15,10 +16,20 @@ public class TextActivity extends Activity implements View.OnClickListener {
     private Button mSelect;
     private EditText mText;
 
+    private int x, y;
+    private String text;
+    private int index;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.text);
+
+        Intent intent = getIntent();
+        x = intent.getIntExtra("x", 0);
+        y = intent.getIntExtra("y", 0);
+        text = intent.getStringExtra("text");
+        index = intent.getIntExtra("index", -1);
 
         mCancel = findViewById(R.id.cancel_text);
         mSelect = findViewById(R.id.select_text);
@@ -26,6 +37,8 @@ public class TextActivity extends Activity implements View.OnClickListener {
 
         mCancel.setOnClickListener(this);
         mSelect.setOnClickListener(this);
+
+        if(text != null && !text.isEmpty()) mText.setText(text);
     }
 
     @Override
@@ -33,12 +46,15 @@ public class TextActivity extends Activity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.cancel_text:
-                setResult(0);
+                setResult(TextMode.RESULT_CANCEL);
                 break;
             case R.id.select_text:
                 Intent intent = new Intent();
+                if(x != 0) intent.putExtra("x", x);
+                if(y != 0) intent.putExtra("y", y);
                 intent.putExtra("text", mText.getText().toString());
-                setResult(1, intent);
+                intent.putExtra("index", index);
+                setResult(TextMode.RESULT_SELECT, intent);
                 break;
         }
 

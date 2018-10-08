@@ -1,15 +1,19 @@
 package com.nq.pictureeditor.record;
 
+import android.util.SparseArray;
+import android.widget.EditText;
+
 import com.nq.pictureeditor.mode.ClipMode;
 import com.nq.pictureeditor.mode.EditMode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RecordManager {
 
     private final static String TAG = "DrawView";
 
-    private ArrayList<EditMode> records = new ArrayList<>();
+    private SparseArray<EditMode> records = new SparseArray<>();
     private int index = -1;
     private boolean changed = false;
 
@@ -73,15 +77,19 @@ public class RecordManager {
     }
 
     private void add(EditMode mode) {
-        index++;
-        replace(mode);
+        if(mode.index != -1) {
+            records.remove(mode.index);
+        }
+        mode.index = ++index;
+        records.put(mode.index, mode);
     }
 
     private void replace(EditMode mode) {
-        for (int i = index; i < records.size(); i++) {
-            records.remove(i);
-        }
-        records.add(mode);
+        records.put(mode.index, mode);
+
+        //for (int i = index; i < records.size(); i++) {
+        //    records.remove(i);
+        //}
     }
 
     /*
@@ -131,7 +139,7 @@ public class RecordManager {
         return records.get(i);
     }
 
-    public ArrayList<EditMode> getRecords() {
+    public SparseArray<EditMode> getRecords() {
         return records;
     }
 
@@ -143,10 +151,13 @@ public class RecordManager {
         index++;
     }
 
-    public void doLoop(ModeLoopInterface modeLoop) {
+    public boolean doLoop(ModeLoopInterface modeLoop) {
         for (int i = 0; i <= index; i++) {
             EditMode mode = records.get(i);
-            modeLoop.pickMode(mode);
+            if (mode == null) continue;
+            if (modeLoop.pickMode(mode)) return false; //if break, doLoop return false;
         }
+
+        return true;
     }
 }

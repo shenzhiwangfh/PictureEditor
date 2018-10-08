@@ -120,12 +120,14 @@ public class ModeController implements
 
     @Override
     public void onTouchEvent(MotionEvent event) {
-        if (mCurrentMode.isPenMode()) {
-            mCurrentMode.onTouchEvent(event, mDrawCanvas, mDrawBitmap);
+        if (mCurrentMode.isTextMode()) {
+            mCurrentMode.onTouchEvent(event, mDrawCanvas);
+        } else if (mCurrentMode.isPenMode()) {
+            mCurrentMode.onTouchEvent(event, mDrawCanvas);
         } else if (mCurrentMode.isMosaicsMode()) {
-            mCurrentMode.onTouchEvent(event, mDrawCanvas, null);
+            mCurrentMode.onTouchEvent(event, mDrawCanvas);
         } else {
-            mCurrentMode.onTouchEvent(event, mDrawCanvas, mDrawBitmap);
+            mCurrentMode.onTouchEvent(event, mDrawCanvas);
         }
     }
 
@@ -148,8 +150,9 @@ public class ModeController implements
 
         mRecordManager.doLoop(new ModeLoopInterface() {
             @Override
-            public void pickMode(EditMode mode) {
+            public boolean pickMode(EditMode mode) {
                 mode.redraw(mDrawCanvas);
+                return false;
             }
         });
     }
@@ -208,5 +211,6 @@ public class ModeController implements
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         mCurrentMode.onActivityResult(requestCode, resultCode, data, mDrawCanvas);
+        redraw();
     }
 }

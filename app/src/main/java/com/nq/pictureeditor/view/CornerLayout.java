@@ -10,6 +10,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.nq.pictureeditor.R;
+import com.nq.pictureeditor.Utils;
 
 public class CornerLayout extends RelativeLayout implements GestureDetector.OnGestureListener {
 
@@ -74,8 +77,9 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
 
         for (int i = 0; i < images.length(); i++) {
             int id = images.getResourceId(i, 0);
-            BitmapDrawable bitmap = (BitmapDrawable) typedArray.getResources().getDrawable(id, null);
-            if (bitmap != null) bitmaps[i] = bitmap.getBitmap();
+            //Drawable bitmap = (Drawable) typedArray.getResources().getDrawable(id, null);
+            //if (bitmap != null) bitmaps[i] = bitmap.getBitmap();
+            bitmaps[i] = Utils.getBitmap(context, id);
         }
         mImgRect.set(0, 0, bitmaps[0].getWidth(), bitmaps[0].getHeight());
 
@@ -198,9 +202,8 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
 
         mRootPaint.setColor(Color.GRAY);
         canvas.drawCircle(mRootPoint.x, mRootPoint.y, itemRadius, mRootPaint);
-        mRootPaint.setColor(Color.RED);
+        mRootPaint.setColor(Color.WHITE);
         canvas.drawCircle(mRootPoint.x, mRootPoint.y, itemRadius - EDGE, mRootPaint);
-
         canvas.drawBitmap(bitmaps[mIndex], mImgRect, mRootRectF, mRootPaint);
     }
 
@@ -251,7 +254,7 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
     public boolean onSingleTapUp(MotionEvent e) {
         mIndex = (mIndex + 1) % mChildCount;
         show();
-        if(l != null) l.onChange(mIndex);
+        if (l != null) l.onChange(mIndex);
         return false;
     }
 
@@ -270,11 +273,11 @@ public class CornerLayout extends RelativeLayout implements GestureDetector.OnGe
         if (velocityX > 50f && velocityY > 50f) {
             mIndex = (mIndex + 1) % mChildCount;
             show();
-            if(l != null) l.onChange(mIndex);
+            if (l != null) l.onChange(mIndex);
         } else if (velocityX < -50f && velocityY < -50f) {
             mIndex = (mIndex - 1 + mChildCount) % mChildCount;
             show();
-            if(l != null) l.onChange(mIndex);
+            if (l != null) l.onChange(mIndex);
         } else if (velocityX > 50f && velocityY < -50f) {
             open = true;
             show();
