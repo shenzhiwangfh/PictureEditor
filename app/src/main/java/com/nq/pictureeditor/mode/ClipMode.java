@@ -64,7 +64,7 @@ public class ClipMode extends EditMode {
     }
 
     @Override
-    public void turnOn(EditMode clipMode, Bitmap mDrawBitmap) {
+    public void turnOn(EditMode clipMode) {
 
     }
 

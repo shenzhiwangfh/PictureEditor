@@ -7,15 +7,8 @@ import android.view.ScaleGestureDetector;
 
 public interface DrawInterface {
     void finishAction(boolean back, boolean forward);
-
-    void save(Bitmap newBitmap);
-
-    void share(Bitmap newBitmap);
-
     void saved();
-
     void shared();
-
     void redraw();
     void onTouchEvent(MotionEvent event);
     void onDraw(Canvas canvas);

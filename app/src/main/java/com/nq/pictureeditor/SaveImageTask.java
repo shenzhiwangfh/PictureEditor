@@ -1,6 +1,5 @@
 package com.nq.pictureeditor;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -62,7 +61,7 @@ public class SaveImageTask extends AsyncTask<Bitmap, Integer, String> {
         Context context = mContext.get();
         Toast.makeText(context, imagePath, Toast.LENGTH_LONG).show();
 
-        if(draw != null) draw.saved();
+        //if(draw != null) draw.saved();
         //Activity activity = (Activity) context;
         //activity.finish();
     }

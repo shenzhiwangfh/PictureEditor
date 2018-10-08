@@ -13,8 +13,17 @@ public class RecordManager {
     private int index = -1;
     private boolean changed = false;
 
+    private static RecordManager mInstance;
+
     public RecordManager() {
 
+    }
+
+    public static RecordManager getInstance() {
+        if(mInstance == null) {
+            mInstance = new RecordManager();
+        }
+        return mInstance;
     }
 
     public void addRecord(EditMode record, boolean force) {

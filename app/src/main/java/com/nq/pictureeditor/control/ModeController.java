@@ -14,6 +14,8 @@ import android.view.ScaleGestureDetector;
 
 import com.nq.pictureeditor.DrawInterface;
 import com.nq.pictureeditor.R;
+import com.nq.pictureeditor.SaveImageTask;
+import com.nq.pictureeditor.ShareImageTask;
 import com.nq.pictureeditor.mode.ClipMode;
 import com.nq.pictureeditor.mode.ColorPenMode;
 import com.nq.pictureeditor.mode.EditMode;
@@ -21,51 +23,65 @@ import com.nq.pictureeditor.mode.MosaicsPenMode;
 import com.nq.pictureeditor.mode.TextMode;
 import com.nq.pictureeditor.record.ModeLoopInterface;
 import com.nq.pictureeditor.record.RecordManager;
+import com.nq.pictureeditor.view.ArcColorPicker;
+import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.CornerLayout;
 import com.nq.pictureeditor.view.ViewUtils;
 
 public class ModeController implements
         CornerLayout.OnModeListener, DrawInterface {
 
+    private Context mContext;
+
     private SparseArray<EditMode> map = new SparseArray<>();
     private EditMode mCurrentMode;
     private ClipMode clipMode;
+    private ColorPenMode colorPenMode;
+    private MosaicsPenMode mosaicsPenMode;
+    private TextMode textMode;
 
-    private Bitmap mOriginBitmap; //
-    private Bitmap mDrawBitmap; //
-    //private Bitmap mMosaicBmp;
-    private Canvas mDrawCanvas = new Canvas(); //
+    private Bitmap mOriginBitmap;
+    private Bitmap mDrawBitmap;
+    private Bitmap mMosaicBmp;
+    private Canvas mDrawCanvas = new Canvas();
 
-    private RecordManager mRecordManager = new RecordManager();
+    private RecordManager mRecordManager;// = new RecordManager();
 
-    private final static int ADD_RECORD = 0;
+
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case ADD_RECORD:
-                    addRecord();
-                    break;
-            }
             return true;
         }
     });
 
     public ModeController(Context context, Bitmap bitmap) {
-        map.put(EditMode.MODE_CLIP, new ClipMode(context));
-        map.put(EditMode.MODE_PEN, new ColorPenMode(context, mHandler));
-        map.put(EditMode.MODE_MOSAICS, new MosaicsPenMode(context, mHandler));
-        map.put(EditMode.MODE_TEXT, new TextMode(mHandler));
+        mContext = context;
 
-        mCurrentMode = clipMode = (ClipMode) map.get(EditMode.MODE_CLIP);
+        clipMode = new ClipMode(context);
+        colorPenMode = new ColorPenMode(context, mHandler);
+        mosaicsPenMode = new MosaicsPenMode(context, mHandler);
+        textMode = new TextMode(mHandler);
+
+        map.put(EditMode.MODE_CLIP, clipMode);
+        map.put(EditMode.MODE_PEN, colorPenMode);
+        map.put(EditMode.MODE_MOSAICS, mosaicsPenMode);
+        map.put(EditMode.MODE_TEXT, textMode);
+        mCurrentMode = clipMode;
+
         initBitmap(context, bitmap, clipMode);
+        colorPenMode.set(clipMode);
+        mosaicsPenMode.set(clipMode);
+        textMode.set(clipMode);
+
+        mRecordManager = RecordManager.getInstance();
         mRecordManager.addRecord(new ClipMode(clipMode), false);
     }
 
     public void initBitmap(Context context, Bitmap bitmap, ClipMode clipMode) {
         mOriginBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         mDrawBitmap = Bitmap.createBitmap(mOriginBitmap);
-        //mMosaicBmp = ViewUtils.BitmapMosaic(mDrawBitmap, 64);
+        mMosaicBmp = ViewUtils.BitmapMosaic(mDrawBitmap, 64);
         mDrawCanvas.setBitmap(mDrawBitmap);
 
         Resources res = context.getResources();
@@ -104,35 +120,18 @@ public class ModeController implements
 
         clipMode.setCanvasRect(canvasRect);
         clipMode.initClipIcon();
-    }
-
-    public void addRecord() {
-        switch (mCurrentMode.getMode()) {
-            case EditMode.MODE_CLIP: {
-                ClipMode o = new ClipMode((ClipMode) mCurrentMode);
-                mRecordManager.addRecord(o, false);
-            }
-            break;
-            case EditMode.MODE_PEN: {
-                ColorPenMode o = new ColorPenMode((ColorPenMode) mCurrentMode);
-                mRecordManager.addRecord(o, false);
-            }
-            break;
-            case EditMode.MODE_MOSAICS: {
-                MosaicsPenMode o = new MosaicsPenMode((MosaicsPenMode) mCurrentMode);
-                mRecordManager.addRecord(o, false);
-            }
-            break;
-            case EditMode.MODE_TEXT: {
-
-            }
-            break;
-        }
+        //clipMode.setZoomScale(mZoomScale);
     }
 
     @Override
     public void onTouchEvent(MotionEvent event) {
-        mCurrentMode.onTouchEvent(event, mDrawCanvas, mDrawBitmap);
+        if (mCurrentMode.isPenMode()) {
+            mCurrentMode.onTouchEvent(event, mDrawCanvas, mDrawBitmap);
+        } else if (mCurrentMode.isMosaicsMode()) {
+            mCurrentMode.onTouchEvent(event, mDrawCanvas, mMosaicBmp);
+        } else {
+            mCurrentMode.onTouchEvent(event, mDrawCanvas, mDrawBitmap);
+        }
     }
 
     @Override
@@ -141,33 +140,33 @@ public class ModeController implements
     }
 
     @Override
-    public void save(Bitmap newBitmap) {
-
-    }
-
-    @Override
-    public void share(Bitmap newBitmap) {
-
-    }
-
-    @Override
     public void saved() {
-
+        redraw();
+        Bitmap newBitmap = mCurrentMode.saveBitmap(mDrawBitmap);
+        new SaveImageTask(mContext, this).execute(newBitmap);
     }
 
     @Override
     public void shared() {
-
+        redraw();
+        Bitmap newBitmap = mCurrentMode.saveBitmap(mDrawBitmap);
+        new ShareImageTask(mContext, this).execute(newBitmap);
     }
 
     @Override
     public void redraw() {
-        //mCurrentMode.resetDrawBitmap();
+        mDrawBitmap.recycle();
+        mDrawBitmap = Bitmap.createBitmap(mOriginBitmap);
+        mDrawCanvas.setBitmap(mDrawBitmap);
 
         mRecordManager.doLoop(new ModeLoopInterface() {
             @Override
             public void pickMode(EditMode mode) {
-                mode.redraw(mDrawCanvas, mDrawBitmap);
+                if (mode.isPenMode()) {
+                    mode.redraw(mDrawCanvas, mDrawBitmap);
+                } else if (mode.isMosaicsMode()) {
+                    mode.redraw(mDrawCanvas, mMosaicBmp);
+                }
             }
         });
     }
@@ -196,16 +195,27 @@ public class ModeController implements
 
     @Override
     public void onChange(int mode) {
-        if (mCurrentMode.isClipMode()) {
-            mHandler.sendEmptyMessage(ADD_RECORD);
-            clipMode.set(mCurrentMode);
-        }
-
         mCurrentMode = map.get(mode);
-        mCurrentMode.turnOn(clipMode, mDrawBitmap);
+        mCurrentMode.turnOn(clipMode);
     }
 
     public EditMode getEditMode(int mode) {
         return map.get(mode);
+    }
+
+    public void setModeChangeListener(CornerLayout layout) {
+        layout.setOnModeListener(this);
+    }
+
+    public void setPenColorListener(ArcColorPicker picker) {
+        picker.setOnPickListener(colorPenMode);
+    }
+
+    public void setPenSizeListener(ArcSeekBar bar) {
+        bar.setOnSlideListener(colorPenMode);
+    }
+
+    public void setMosaicSizeListener(ArcSeekBar bar) {
+        bar.setOnSlideListener(mosaicsPenMode);
     }
 }

@@ -4,21 +4,22 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.os.Handler;
 
 import com.nq.pictureeditor.R;
 import com.nq.pictureeditor.Utils;
+import com.nq.pictureeditor.record.RecordManager;
 import com.nq.pictureeditor.view.ViewUtils;
 
 public class MosaicsPenMode extends PenMode {
 
     private PorterDuffXfermode mDuffXfermode;
-
-    private Bitmap mMosaicBmp;
 
     public MosaicsPenMode(Context context, Handler handler) {
         super(handler);
@@ -35,11 +36,7 @@ public class MosaicsPenMode extends PenMode {
 
     public MosaicsPenMode(MosaicsPenMode o) {
         super(o);
-    }
-
-    public void setMosaicBmp(Bitmap mDrawBitmap) {
-        if (mMosaicBmp != null) mMosaicBmp.recycle();
-        mMosaicBmp = ViewUtils.BitmapMosaic(mDrawBitmap, 64);
+        mDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
     }
 
     @Override
@@ -48,30 +45,17 @@ public class MosaicsPenMode extends PenMode {
     }
 
     @Override
-    public void turnOn(EditMode clipMode, Bitmap mDrawBitmap) {
-        super.turnOn(clipMode, mDrawBitmap);
-        //setMosaicBmp(mDrawBitmap);
+    public void turnOn(EditMode clipMode) {
+        super.turnOn(clipMode);
     }
 
     @Override
-    public void redraw(Canvas mDrawCanvas, Bitmap mDrawBitmap) {
-        setMosaicBmp(mDrawBitmap);
-
-        int canvasWidth = mDrawCanvas.getWidth();
-        int canvasHeight = mDrawCanvas.getHeight();
-        int layerId = mDrawCanvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
-
-        mDrawCanvas.clipRect(clipBitmapRect);
-        mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
-
-        mDrawPaint.setXfermode(mDuffXfermode);
-        mDrawCanvas.drawBitmap(mMosaicBmp, 0, 0, mDrawPaint); //画出重叠区域
-        mDrawPaint.setXfermode(null);
-        mDrawCanvas.restoreToCount(layerId);
+    public void redraw(Canvas mDrawCanvas, Bitmap mMosaicBmp) {
+        drawPath(mDrawCanvas, clipBitmapRect, mMosaicBmp, mDrawPath, mDrawPaint, mDuffXfermode);
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap) {
+    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mMosaicBmp) {
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -83,20 +67,7 @@ public class MosaicsPenMode extends PenMode {
                 downX = mapped.x;
                 downY = mapped.y;
                 mDrawPath.moveTo(downX, downY);
-
-                /*
-                int canvasWidth = mDrawCanvas.getWidth();
-                int canvasHeight = mDrawCanvas.getHeight();
-                int layerId = mDrawCanvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
-
-                mDrawCanvas.clipRect(clipBitmapRect);
-                mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
-
-                mDrawPaint.setXfermode(mDuffXfermode);
-                mDrawCanvas.drawBitmap(mMosaicBmp, 0, 0, mDrawPaint); //画出重叠区域
-                mDrawPaint.setXfermode(null);
-                mDrawCanvas.restoreToCount(layerId);
-                */
+                drawPath(mDrawCanvas, clipBitmapRect, mMosaicBmp, mDrawPath, mDrawPaint, mDuffXfermode);
 
             }
             break;
@@ -111,46 +82,32 @@ public class MosaicsPenMode extends PenMode {
                     mDrawPath.quadTo(downX, downY, (x + downX) / 2, (y + downY) / 2);
                     downX = x;
                     downY = y;
-
-                    /*
-                    int canvasWidth = mDrawCanvas.getWidth();
-                    int canvasHeight = mDrawCanvas.getHeight();
-                    int layerId = mDrawCanvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
-
-                    mDrawCanvas.clipRect(clipBitmapRect);
-                    mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
-
-                    mDrawPaint.setXfermode(mDuffXfermode);
-                    mDrawCanvas.drawBitmap(mMosaicBmp, 0, 0, mDrawPaint); //画出重叠区域
-                    mDrawPaint.setXfermode(null);
-                    mDrawCanvas.restoreToCount(layerId);
-                    */
+                    drawPath(mDrawCanvas, clipBitmapRect, mMosaicBmp, mDrawPath, mDrawPaint, mDuffXfermode);
                 }
             }
             break;
             case MotionEvent.ACTION_UP: {
                 Point mapped = Utils.mapped(M, event.getX(), event.getY());
                 mDrawPath.lineTo(mapped.x, mapped.y);
-
-                /*
-                int canvasWidth = mDrawCanvas.getWidth();
-                int canvasHeight = mDrawCanvas.getHeight();
-                int layerId = mDrawCanvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
-
-                mDrawCanvas.clipRect(clipBitmapRect);
-                mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
-
-                mDrawPaint.setXfermode(mDuffXfermode);
-                mDrawCanvas.drawBitmap(mMosaicBmp, 0, 0, mDrawPaint); //画出重叠区域
-                mDrawPaint.setXfermode(null);
-                mDrawCanvas.restoreToCount(layerId);
-                */
-
-                mHandler.sendEmptyMessage(0);
-                //redraw(mDrawCanvas, mDrawBitmap);
+                drawPath(mDrawCanvas, clipBitmapRect, mMosaicBmp, mDrawPath, mDrawPaint, mDuffXfermode);
+                RecordManager.getInstance().addRecord(new MosaicsPenMode(this), false);
             }
             break;
         }
         return true;
+    }
+
+    private void drawPath(Canvas canvas, RectF rect, Bitmap bitmap, Path path, Paint paint, PorterDuffXfermode mode) {
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+        int layerId = canvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
+
+        canvas.clipRect(rect);
+        canvas.drawPath(path, paint);
+
+        paint.setXfermode(mode);
+        canvas.drawBitmap(bitmap, 0, 0, paint); //画出重叠区域
+        paint.setXfermode(null);
+        canvas.restoreToCount(layerId);
     }
 }

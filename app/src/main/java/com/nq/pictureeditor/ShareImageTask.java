@@ -84,7 +84,7 @@ public class ShareImageTask extends AsyncTask<Bitmap, Integer, Uri> {
             context.startActivity(intent);
         //}
 
-        if(draw != null) draw.shared();
+        //if(draw != null) draw.shared();
     }
 }
 

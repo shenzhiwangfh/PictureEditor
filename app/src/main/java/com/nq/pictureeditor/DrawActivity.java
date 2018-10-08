@@ -46,7 +46,7 @@ public class DrawActivity extends AppCompatActivity
     private ImageView mForward;
 
     private CornerLayout mCornerLayout;
-    private ArcColorPicker mColorPicker;
+    private ArcColorPicker mPenColorPicker;
     private ArcSeekBar mPenSeekBar;
     private ArcSeekBar mMosaicsSeekBar;
 
@@ -100,19 +100,14 @@ public class DrawActivity extends AppCompatActivity
 
     private void initControllors() {
         mCornerLayout = findViewById(R.id.control);
-        mColorPicker = findViewById(R.id.pen_color);
+        mPenColorPicker = findViewById(R.id.pen_color);
         mPenSeekBar = findViewById(R.id.pen_size);
         mMosaicsSeekBar = findViewById(R.id.mosaics_size);
 
-        ColorPenMode colorPenMode = (ColorPenMode) mController.getEditMode(EditMode.MODE_PEN);
-        MosaicsPenMode mosaicsPenMode = (MosaicsPenMode) mController.getEditMode(EditMode.MODE_MOSAICS);
-
-        mCornerLayout.setOnModeListener(mController);
-        mColorPicker.setOnPickListener(colorPenMode);
-        mColorPicker.setOnShowListener(this);
-        mPenSeekBar.setOnSlideListener(colorPenMode);
-        mMosaicsSeekBar.setOnSlideListener(mosaicsPenMode);
-        mPenSeekBar.setOnShowListener(this);
+        mController.setModeChangeListener(mCornerLayout);
+        mController.setPenColorListener(mPenColorPicker);
+        mController.setPenSizeListener(mPenSeekBar);
+        mController.setMosaicSizeListener(mMosaicsSeekBar);
     }
 
     /*
@@ -149,12 +144,14 @@ public class DrawActivity extends AppCompatActivity
         switch (id) {
             case R.id.save: {
                 mSave.setEnabled(false);
-                mDrawView.goSave();
+                //mDrawView.goSave();
+                mController.saved();
             }
             break;
             case R.id.share: {
                 mShare.setEnabled(false);
-                mDrawView.goShare();
+                //mDrawView.goShare();
+                mController.shared();
             }
             break;
             case R.id.back: {

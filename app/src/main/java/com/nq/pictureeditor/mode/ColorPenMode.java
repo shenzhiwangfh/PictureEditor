@@ -4,12 +4,16 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.nq.pictureeditor.R;
 import com.nq.pictureeditor.Utils;
+import com.nq.pictureeditor.record.RecordManager;
 
 public class ColorPenMode extends PenMode {
 
@@ -33,8 +37,8 @@ public class ColorPenMode extends PenMode {
     }
 
     @Override
-    public void turnOn(EditMode clipMode, Bitmap mDrawBitmap) {
-        super.turnOn(clipMode, mDrawBitmap);
+    public void turnOn(EditMode clipMode) {
+        super.turnOn(clipMode);
     }
 
     @Override
@@ -44,10 +48,7 @@ public class ColorPenMode extends PenMode {
 
     @Override
     public void redraw(Canvas mDrawCanvas, Bitmap mDrawBitmap) {
-        mDrawCanvas.save();
-        mDrawCanvas.clipRect(clipBitmapRect);
-        mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
-        mDrawCanvas.restore();
+        drawPath(mDrawCanvas, clipBitmapRect, mDrawPath, mDrawPaint);
     }
 
     @Override
@@ -63,8 +64,7 @@ public class ColorPenMode extends PenMode {
                 downX = mapped.x;
                 downY = mapped.y;
                 mDrawPath.moveTo(downX, downY);
-                mDrawCanvas.clipRect(clipBitmapRect);
-                mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
+                drawPath(mDrawCanvas, clipBitmapRect, mDrawPath, mDrawPaint);
             }
             break;
             case MotionEvent.ACTION_MOVE: {
@@ -78,22 +78,25 @@ public class ColorPenMode extends PenMode {
                     mDrawPath.quadTo(downX, downY, (x + downX) / 2, (y + downY) / 2);
                     downX = x;
                     downY = y;
-                    mDrawCanvas.clipRect(clipBitmapRect);
-                    mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
+                    drawPath(mDrawCanvas, clipBitmapRect, mDrawPath, mDrawPaint);
                 }
             }
             break;
             case MotionEvent.ACTION_UP: {
                 Point mapped = Utils.mapped(M, event.getX(), event.getY());
                 mDrawPath.lineTo(mapped.x, mapped.y);
-                mDrawCanvas.clipRect(clipBitmapRect);
-                mDrawCanvas.drawPath(mDrawPath, mDrawPaint);
-
-                mHandler.sendEmptyMessage(0);
-                //redraw(mDrawCanvas, mDrawBitmap);
+                drawPath(mDrawCanvas, clipBitmapRect, mDrawPath, mDrawPaint);
+                RecordManager.getInstance().addRecord(new ColorPenMode(this), false);
             }
             break;
         }
         return true;
+    }
+
+    private void drawPath(Canvas canvas, RectF rect, Path path, Paint paint) {
+        canvas.save();
+        canvas.clipRect(rect);
+        canvas.drawPath(path, paint);
+        canvas.restore();
     }
 }

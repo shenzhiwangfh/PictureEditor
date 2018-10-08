@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import java.io.Serializable;
@@ -48,13 +49,14 @@ public abstract class EditMode implements Serializable {
         this.bitmapRect.set(o.bitmapRect);
         this.clipBitmapRect.set(o.clipBitmapRect);
         this.M.set(o.M);
+        this.mZoomScale = o.mZoomScale;
     }
 
     public abstract int getMode();
 
     public abstract boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap);
 
-    public abstract void turnOn(EditMode clipMode, Bitmap mDrawBitmap);
+    public abstract void turnOn(EditMode clipMode);
 
     public abstract void turnOff();
 
@@ -116,6 +118,8 @@ public abstract class EditMode implements Serializable {
     }
 
     public void setPictureRect(float mZoomScale) {
+        this.mZoomScale = mZoomScale;
+
         float oldWidth = prePictureRect.width();
         float oldHeight = prePictureRect.height();
         float newWidth = bitmapRect.width() * mZoomScale;
@@ -155,5 +159,9 @@ public abstract class EditMode implements Serializable {
 
     public void matrix() {
         M.setRectToRect(bitmapRect, pictureRect, Matrix.ScaleToFit.FILL);
+    }
+
+    public void setZoomScale(float mZoomScale) {
+        this.mZoomScale = mZoomScale;
     }
 }

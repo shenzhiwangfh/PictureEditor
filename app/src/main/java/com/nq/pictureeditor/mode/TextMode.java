@@ -23,7 +23,7 @@ public class TextMode extends EditMode {
     }
 
     @Override
-    public void turnOn(EditMode clipMode, Bitmap mDrawBitmap) {
+    public void turnOn(EditMode clipMode) {
         set(clipMode);
     }
 

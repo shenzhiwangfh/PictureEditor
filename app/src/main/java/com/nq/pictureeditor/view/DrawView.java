@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
 import com.nq.pictureeditor.record.ModeLoopInterface;
 import com.nq.pictureeditor.DrawInterface;
 import com.nq.pictureeditor.mode.EditMode;
@@ -19,7 +20,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     private Context mContext;
     private ScaleGestureDetector mGesture;
 
-    //private RecordManager mRecordManager = new RecordManager();
     private DrawInterface draw;
 
     public void setController(DrawInterface draw) {
@@ -63,7 +63,7 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
                     break;
                 case MotionEvent.ACTION_UP:
                     draw.onTouchEvent(event);
-                    draw.redraw();
+                    //draw.redraw();
                     invalidate();
                     invalidateBtn();
                     break;
@@ -99,24 +99,9 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
         draw.onScaleEnd(detector);
-        draw.redraw();
+        //draw.redraw();
         invalidate();
         invalidateBtn();
-    }
-
-    private void redrawBitmap() {
-        //mController.resetDrawBitmap();
-
-        /*
-        mRecordManager.doLoop(new ModeLoopInterface() {
-            @Override
-            public void pickMode(EditMode mode) {
-                mode.redraw();
-            }
-        });
-        */
-
-        invalidate();
     }
 
     private void invalidateBtn() {
@@ -175,7 +160,8 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
 
     public void goSave() {
         if (draw != null) {
-            draw.redraw();
+            draw.saved();
+            //draw.redraw();
             //Bitmap newBitmap = mCurrentMode.saveBitmap();
             //draw.save(newBitmap);
         }
@@ -213,12 +199,4 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         mCurrentMode.turnOn();
     }
     */
-
-    public void setPenColor(int color) {
-        //mCurrentMode.setColor(color);
-    }
-
-    public void setPenSize(int size) {
-        //mCurrentMode.setSize(size);
-    }
 }
