@@ -1,6 +1,7 @@
 package com.nq.pictureeditor.mode;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -38,17 +39,19 @@ public class ClipMode extends EditMode {
     private static RectF canvasRect = new RectF();
 
     private int clipMode;
-    private Paint mPaint = new Paint();
+    //private Paint mPaint = new Paint();
 
     public ClipMode(Context context) {
+        super(context);
+
         Resources res = context.getResources();
         ICON_WIDTH = res.getDimension(R.dimen.icon_width);
         ICON_SIZE = res.getDimension(R.dimen.icon_size);
         LINE_WIDTH = res.getDimension(R.dimen.line_width);
         CLIP_MIN_SIZE = res.getDimension(R.dimen.clip_min_size);
 
-        mPaint.setAntiAlias(true);
-        mPaint.setColor(Color.RED);
+        mDrawPaint.setAntiAlias(true);
+        mDrawPaint.setColor(Color.RED);
     }
 
     public ClipMode(ClipMode o) {
@@ -73,8 +76,13 @@ public class ClipMode extends EditMode {
 
     }
 
+    //@Override
+    public void redraw(Canvas mDrawCanvas) {
+
+    }
+
     @Override
-    public void redraw(Canvas mDrawCanvas, Bitmap mDrawBitmap) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data, Canvas mDrawCanvas) {
 
     }
 
@@ -330,20 +338,20 @@ public class ClipMode extends EditMode {
         canvas.restore();
 
         //draw icon
-        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.right, iconLeftTop.top + ICON_WIDTH, mPaint);
-        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.left + ICON_WIDTH, iconLeftTop.bottom, mPaint);
-        canvas.drawRect(iconRightTop.left, iconRightTop.top, iconRightTop.right, iconLeftTop.top + ICON_WIDTH, mPaint);
-        canvas.drawRect(iconRightTop.right - ICON_WIDTH, iconRightTop.top, iconRightTop.right, iconLeftTop.bottom, mPaint);
-        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.bottom - ICON_WIDTH, iconLeftBottom.right, iconLeftBottom.bottom, mPaint);
-        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.top, iconLeftBottom.left + ICON_WIDTH, iconLeftBottom.bottom, mPaint);
-        canvas.drawRect(iconRightBottom.left, iconRightBottom.bottom - ICON_WIDTH, iconRightBottom.right, iconRightBottom.bottom, mPaint);
-        canvas.drawRect(iconRightBottom.right - ICON_WIDTH, iconRightBottom.top, iconRightBottom.right, iconRightBottom.bottom, mPaint);
+        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.right, iconLeftTop.top + ICON_WIDTH, mDrawPaint);
+        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.left + ICON_WIDTH, iconLeftTop.bottom, mDrawPaint);
+        canvas.drawRect(iconRightTop.left, iconRightTop.top, iconRightTop.right, iconLeftTop.top + ICON_WIDTH, mDrawPaint);
+        canvas.drawRect(iconRightTop.right - ICON_WIDTH, iconRightTop.top, iconRightTop.right, iconLeftTop.bottom, mDrawPaint);
+        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.bottom - ICON_WIDTH, iconLeftBottom.right, iconLeftBottom.bottom, mDrawPaint);
+        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.top, iconLeftBottom.left + ICON_WIDTH, iconLeftBottom.bottom, mDrawPaint);
+        canvas.drawRect(iconRightBottom.left, iconRightBottom.bottom - ICON_WIDTH, iconRightBottom.right, iconRightBottom.bottom, mDrawPaint);
+        canvas.drawRect(iconRightBottom.right - ICON_WIDTH, iconRightBottom.top, iconRightBottom.right, iconRightBottom.bottom, mDrawPaint);
 
         //draw line
-        canvas.drawRect(lineLeft, mPaint);
-        canvas.drawRect(lineRight, mPaint);
-        canvas.drawRect(lineTop, mPaint);
-        canvas.drawRect(lineBottom, mPaint);
+        canvas.drawRect(lineLeft, mDrawPaint);
+        canvas.drawRect(lineRight, mDrawPaint);
+        canvas.drawRect(lineTop, mDrawPaint);
+        canvas.drawRect(lineBottom, mDrawPaint);
     }
 
     @Override

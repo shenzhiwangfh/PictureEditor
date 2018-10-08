@@ -1,5 +1,7 @@
 package com.nq.pictureeditor.mode;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,9 +11,13 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.widget.EditText;
+
 import java.io.Serializable;
 
 public abstract class EditMode implements Serializable {
+    public Context mContext;
+
     public final static int MODE_CLIP = 0;
     public final static int MODE_PEN = 1;
     public final static int MODE_MOSAICS = 2;
@@ -35,11 +41,17 @@ public abstract class EditMode implements Serializable {
     public Paint mDrawPaint;
 
     public EditMode() {
-        mDrawPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mDrawPaint = new Paint(/*Paint.ANTI_ALIAS_FLAG*/);
         mDrawPaint.setColor(Color.BLACK);
     }
 
+    public EditMode(Context context) {
+        this();
+        mContext = context;
+    }
+
     public EditMode(EditMode o) {
+        this();
         set(o);
     }
 
@@ -60,7 +72,9 @@ public abstract class EditMode implements Serializable {
 
     public abstract void turnOff();
 
-    public abstract void redraw(Canvas mDrawCanvas, Bitmap mDrawBitmap);
+    public abstract void redraw(Canvas mDrawCanvas);
+
+    public abstract void onActivityResult(int requestCode, int resultCode, Intent data, Canvas mDrawCanvas);
 
     /*
     public void resetDrawBitmap() {

@@ -1,6 +1,7 @@
 package com.nq.pictureeditor.mode;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -21,8 +22,8 @@ public class PenMode extends EditMode  implements
 
     public static final float PEN_MIN_MOVE = 4.0f;
 
-    public PenMode(Handler handler) {
-        super();
+    public PenMode(Context context, Handler handler) {
+        super(context);
         mHandler = handler;
     }
 
@@ -53,7 +54,12 @@ public class PenMode extends EditMode  implements
     }
 
     @Override
-    public void redraw(Canvas mDrawCanvas, Bitmap mMosaicBmp) {
+    public void redraw(Canvas mDrawCanvas) {
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data, Canvas mDrawCanvas) {
 
     }
 

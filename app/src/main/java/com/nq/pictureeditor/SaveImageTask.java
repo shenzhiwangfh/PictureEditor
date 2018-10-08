@@ -8,6 +8,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.widget.Toast;
+
+import com.nq.pictureeditor.view.DrawInterface;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

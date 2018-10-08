@@ -19,11 +19,13 @@ import com.nq.pictureeditor.view.ViewUtils;
 
 public class MosaicsPenMode extends PenMode {
 
-    private PorterDuffXfermode mDuffXfermode;
+    private static PorterDuffXfermode mDuffXfermode;
+    private static Bitmap mMosaicBmp;
 
-    public MosaicsPenMode(Context context, Handler handler) {
-        super(handler);
+    public MosaicsPenMode(Context context, Handler handler, Bitmap bitmap) {
+        super(context, handler);
         mDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
+        mMosaicBmp = ViewUtils.BitmapMosaic(bitmap, 64);
 
         mDrawPaint.setAntiAlias(true);
         mDrawPaint.setDither(true);
@@ -36,7 +38,7 @@ public class MosaicsPenMode extends PenMode {
 
     public MosaicsPenMode(MosaicsPenMode o) {
         super(o);
-        mDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
+        //mDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
     }
 
     @Override
@@ -50,12 +52,12 @@ public class MosaicsPenMode extends PenMode {
     }
 
     @Override
-    public void redraw(Canvas mDrawCanvas, Bitmap mMosaicBmp) {
+    public void redraw(Canvas mDrawCanvas) {
         drawPath(mDrawCanvas, clipBitmapRect, mMosaicBmp, mDrawPath, mDrawPaint, mDuffXfermode);
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mMosaicBmp) {
+    public boolean onTouchEvent(MotionEvent event, Canvas mDrawCanvas, Bitmap mDrawBitmap) {
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN: {

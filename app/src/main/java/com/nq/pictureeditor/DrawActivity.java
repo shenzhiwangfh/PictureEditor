@@ -35,7 +35,7 @@ import java.util.HashMap;
 public class DrawActivity extends AppCompatActivity
         implements View.OnClickListener, OnShowListener {
 
-    private final static String TAG = "DrawActivity";
+    public final static String TAG = "DrawActivity";
 
     private DrawView mDrawView;
     private Preview mPreview;
@@ -57,16 +57,8 @@ public class DrawActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
 
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
-        Bitmap mBitmap = bitmapDrawable.getBitmap();
-        mController = new ModeController(this, mBitmap);
-
         initActions();
         initControllors();
-
-        mDrawView = findViewById(R.id.main);
-        mDrawView.setController(mController);
-        mPreview = findViewById(R.id.preview);
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
     }
@@ -99,44 +91,24 @@ public class DrawActivity extends AppCompatActivity
     }
 
     private void initControllors() {
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
+        Bitmap mBitmap = bitmapDrawable.getBitmap();
+        mController = new ModeController(this, mBitmap);
+
+        mDrawView = findViewById(R.id.main);
+        mPreview = findViewById(R.id.preview);
+
         mCornerLayout = findViewById(R.id.control);
         mPenColorPicker = findViewById(R.id.pen_color);
         mPenSeekBar = findViewById(R.id.pen_size);
         mMosaicsSeekBar = findViewById(R.id.mosaics_size);
 
+        mController.setDrawListener(mDrawView);
         mController.setModeChangeListener(mCornerLayout);
         mController.setPenColorListener(mPenColorPicker);
         mController.setPenSizeListener(mPenSeekBar);
         mController.setMosaicSizeListener(mMosaicsSeekBar);
     }
-
-    /*
-    @Override
-    public void finishAction(boolean back, boolean forward) {
-        mBack.setEnabled(back);
-        mForward.setEnabled(forward);
-    }
-
-    @Override
-    public void save(Bitmap newBitmap) {
-        new SaveImageTask(this, this).execute(newBitmap);
-    }
-
-    @Override
-    public void share(Bitmap newBitmap) {
-        new ShareImageTask(this, this).execute(newBitmap);
-    }
-
-    @Override
-    public void saved() {
-        mSave.setEnabled(true);
-    }
-
-    @Override
-    public void shared() {
-        mShare.setEnabled(true);
-    }
-    */
 
     @Override
     public void onClick(View v) {
@@ -144,13 +116,11 @@ public class DrawActivity extends AppCompatActivity
         switch (id) {
             case R.id.save: {
                 mSave.setEnabled(false);
-                //mDrawView.goSave();
                 mController.saved();
             }
             break;
             case R.id.share: {
                 mShare.setEnabled(false);
-                //mDrawView.goShare();
                 mController.shared();
             }
             break;
@@ -170,5 +140,11 @@ public class DrawActivity extends AppCompatActivity
     @Override
     public void onShow(View view, boolean show) {
         mPreview.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mController.onActivityResult(requestCode, resultCode, data);
     }
 }

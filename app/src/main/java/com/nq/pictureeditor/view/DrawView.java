@@ -2,16 +2,13 @@ package com.nq.pictureeditor.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-
-import com.nq.pictureeditor.record.ModeLoopInterface;
-import com.nq.pictureeditor.DrawInterface;
-import com.nq.pictureeditor.mode.EditMode;
-import com.nq.pictureeditor.record.RecordManager;
 
 public class DrawView extends View implements ScaleGestureDetector.OnScaleGestureListener {
 
@@ -35,6 +32,21 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         mContext = context;
         mGesture = new ScaleGestureDetector(mContext, this);
     }
+
+    public Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    invalidate();
+                    break;
+                case 1:
+                    invalidateBtn();
+                    break;
+            }
+            return true;
+        }
+    });
 
     /*
     private void buildEraserPaint() {
@@ -63,7 +75,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
                     break;
                 case MotionEvent.ACTION_UP:
                     draw.onTouchEvent(event);
-                    //draw.redraw();
                     invalidate();
                     invalidateBtn();
                     break;
@@ -99,7 +110,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
         draw.onScaleEnd(detector);
-        //draw.redraw();
         invalidate();
         invalidateBtn();
     }
@@ -157,23 +167,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
         return mode;
     }
     */
-
-    public void goSave() {
-        if (draw != null) {
-            draw.saved();
-            //draw.redraw();
-            //Bitmap newBitmap = mCurrentMode.saveBitmap();
-            //draw.save(newBitmap);
-        }
-    }
-
-    public void goShare() {
-        if (draw != null) {
-            draw.redraw();
-            //Bitmap newBitmap = mCurrentMode.saveBitmap();
-            //draw.share(newBitmap);
-        }
-    }
 
     /*
     public void setMode(int mode) {

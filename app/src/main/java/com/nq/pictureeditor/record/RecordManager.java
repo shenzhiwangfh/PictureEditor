@@ -20,7 +20,7 @@ public class RecordManager {
     }
 
     public static RecordManager getInstance() {
-        if(mInstance == null) {
+        if (mInstance == null) {
             mInstance = new RecordManager();
         }
         return mInstance;
@@ -66,6 +66,7 @@ public class RecordManager {
                 break;
             case EditMode.MODE_PEN:
             case EditMode.MODE_MOSAICS:
+            case EditMode.MODE_TEXT:
                 add(record);
                 break;
         }

@@ -18,7 +18,7 @@ import com.nq.pictureeditor.record.RecordManager;
 public class ColorPenMode extends PenMode {
 
     public ColorPenMode(Context context, Handler handler) {
-        super(handler);
+        super(context, handler);
         mDrawPaint.setAntiAlias(true);
         mDrawPaint.setStyle(Paint.Style.STROKE);
         mDrawPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -47,7 +47,7 @@ public class ColorPenMode extends PenMode {
     }
 
     @Override
-    public void redraw(Canvas mDrawCanvas, Bitmap mDrawBitmap) {
+    public void redraw(Canvas mDrawCanvas) {
         drawPath(mDrawCanvas, clipBitmapRect, mDrawPath, mDrawPaint);
     }
 
