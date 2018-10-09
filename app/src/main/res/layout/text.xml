@@ -1,29 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/transparent"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button android:id="@+id/cancel_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="Cancel"/>
 
-        <Button android:id="@+id/select_text"
+        <Button
+            android:id="@+id/cancel_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="Select"/>
+            android:background="@android:color/transparent"
+            android:text="@string/cancel"
+            android:textColor="@android:color/white"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/select_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
+            android:text="@string/done"
+            android:textColor="@android:color/holo_green_light"
+            android:textSize="24sp" />
     </LinearLayout>
 
     <EditText
         android:id="@+id/text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:maxLines="2" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.nq.pictureeditor.view.ArcColorPicker
+            android:id="@+id/text_color"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            app:color_radius="10dp"
+            app:colors="@array/pen_colors"
+            app:default_color="@color/black"
+            app:picker_radius="120dp"
+            app:values="@array/pen_values" />
+
+        <com.nq.pictureeditor.view.ArcSeekBar
+            android:id="@+id/text_size"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:padding="12dp"
+            app:arc_radius="80dp"
+            app:arc_width="4dp"
+            app:default_value="@integer/text_default_size"
+            app:max_value="@integer/text_max_size"
+            app:min_value="@integer/text_min_size"
+            app:slider_radius="10dp" />
+    </RelativeLayout>
 
 </LinearLayout>

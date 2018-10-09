@@ -48,6 +48,7 @@ public class DrawActivity extends AppCompatActivity
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
     }
 
+    /*
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -60,6 +61,7 @@ public class DrawActivity extends AppCompatActivity
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
+    */
 
     private void initActions() {
         mSave = findViewById(R.id.save);

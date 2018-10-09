@@ -5,4 +5,8 @@
     <integer name="pen_default_size">24</integer>
 
     <integer name="pen_default_color">7</integer>
+
+    <integer name="text_min_size">24</integer>
+    <integer name="text_max_size">48</integer>
+    <integer name="text_default_size">30</integer>
 </resources>

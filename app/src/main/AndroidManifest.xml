@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".text.TextActivity">
+        <activity android:name=".text.TextActivity"
+            android:theme="@style/TransparentTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>

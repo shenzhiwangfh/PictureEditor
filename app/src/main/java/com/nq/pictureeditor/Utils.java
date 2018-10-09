@@ -1,6 +1,7 @@
 package com.nq.pictureeditor;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Environment;
+import android.util.TypedValue;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -58,5 +60,10 @@ public class Utils {
             bitmap = BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
         }
         return bitmap;
+    }
+
+    public static float textSize2paintSize(float size) {
+        Resources r = Resources.getSystem();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, r.getDisplayMetrics());
     }
 }
