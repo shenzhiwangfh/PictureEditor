@@ -97,13 +97,19 @@ public class TextActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onPick(View view, int color) {
-        this.color = color;
-        mText.setTextColor(color);
+        int id = view.getId();
+        if(id == R.id.text_color) {
+            this.color = color;
+            mText.setTextColor(this.color);
+        }
     }
 
     @Override
     public void onSlide(View view, int size) {
-        this.size = size;
-        mText.setTextSize(TypedValue.COMPLEX_UNIT_SP, size * zoom);
+        int id = view.getId();
+        if(id == R.id.text_size) {
+            this.size = size;
+            mText.setTextSize(TypedValue.COMPLEX_UNIT_SP, this.size * zoom);
+        }
     }
 }

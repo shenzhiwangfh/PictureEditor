@@ -75,6 +75,8 @@ public class TextMode extends EditMode {
         this.mRectPaint.set(o.mRectPaint);
         this.textRect.set(o.textRect);
         this.index = o.index;
+        this.color = o.color;
+        this.size = o.size;
     }
 
     @Override
@@ -102,9 +104,9 @@ public class TextMode extends EditMode {
                                     intent.putExtra("y", textMode.mapped.y);
                                     intent.putExtra("text", textMode.text);
                                     intent.putExtra("index", textMode.index);
-                                    intent.putExtra("color", color);
-                                    intent.putExtra("size", size);
-                                    intent.putExtra("zoom", mZoomScale);
+                                    intent.putExtra("color", textMode.color);
+                                    intent.putExtra("size", textMode.size);
+                                    intent.putExtra("zoom", textMode.mZoomScale);
                                     intent.setClass(mContext, TextActivity.class);
                                     ((Activity) mContext).startActivityForResult(intent, REQUEST_CODE);
                                     return true;
@@ -201,7 +203,7 @@ public class TextMode extends EditMode {
         float right = mapped.x + maxLength;
         float bottom = top + (metrics.bottom - metrics.top) * layout.getLineCount();
         textRect.set(left, top, right, bottom);
-        if (true) canvas.drawRect(textRect, mRectPaint);
+        //if (true) canvas.drawRect(textRect, mRectPaint);
 
         canvas.save();
         canvas.translate(mapped.x, mapped.y + metrics.top);

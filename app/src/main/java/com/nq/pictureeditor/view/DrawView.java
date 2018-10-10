@@ -41,7 +41,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
                     invalidate();
                     break;
                 case 1:
-                    invalidateBtn();
                     break;
             }
             return true;
@@ -71,12 +70,10 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
                 case MotionEvent.ACTION_MOVE:
                     draw.onTouchEvent(event);
                     invalidate();
-                    invalidateBtn();
                     break;
                 case MotionEvent.ACTION_UP:
                     draw.onTouchEvent(event);
                     invalidate();
-                    invalidateBtn();
                     break;
             }
         } else {
@@ -95,7 +92,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     public boolean onScale(ScaleGestureDetector detector) {
         boolean ret = draw.onScale(detector);
         invalidate();
-        invalidateBtn();
         return ret;
     }
 
@@ -103,7 +99,6 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     public boolean onScaleBegin(ScaleGestureDetector detector) {
         boolean ret = draw.onScaleBegin(detector);
         invalidate();
-        invalidateBtn();
         return ret;
     }
 
@@ -111,85 +106,5 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     public void onScaleEnd(ScaleGestureDetector detector) {
         draw.onScaleEnd(detector);
         invalidate();
-        invalidateBtn();
     }
-
-    private void invalidateBtn() {
-        /*
-        if (draw != null) {
-            int index = mRecordManager.getIndex();
-            boolean back = index > 0;
-            boolean forward = index < (mRecordManager.size() - 1);
-            draw.finishAction(back, forward);
-        }
-        */
-    }
-
-    /*
-    public int goBack() {
-        EditMode preEditMode = mRecordManager.getPreMode();
-        int mode = preEditMode.getMode();
-        switch (mode) {
-            case EditMode.MODE_CLIP:
-            case EditMode.MODE_PEN:
-            case EditMode.MODE_MOSAICS:
-                //pictureRect.set(preEditMode.pictureRect);
-                //clipPictureRect.set(preEditMode.clipPictureRect);
-                //M.set(preEditMode.M);
-                //mClipMode.setClipBitmapRect(pictureRect, clipPictureRect, bitmapRect, clipBitmapRect);
-                break;
-        }
-
-        //editMode2 = mode;
-        mRecordManager.back();
-        invalidateBtn();
-        redrawBitmap();
-
-        return mode;
-    }
-
-    public int goForward() {
-        EditMode nextEditMode = mRecordManager.getNextMode();
-        int mode = nextEditMode.getMode();
-        switch (mode) {
-            case EditMode.MODE_CLIP:
-            case EditMode.MODE_PEN:
-            case EditMode.MODE_MOSAICS:
-                //M.set(nextEditMode.M);
-                //mClipMode.setClipBitmapRect(pictureRect, clipPictureRect, bitmapRect, clipBitmapRect);
-                break;
-        }
-
-        //editMode2 = mode;
-        mRecordManager.forward();
-        invalidateBtn();
-        redrawBitmap();
-        return mode;
-    }
-    */
-
-    /*
-    public void setMode(int mode) {
-        EditMode editMode;
-        if(mCurrentMode.isClipMode()) {
-            editMode = (ClipMode)((ClipMode) mCurrentMode).clone();
-            mRecordManager.addRecord(editMode, false);
-        } else if(mCurrentMode.isPenMode()) {
-            editMode = (ColorPenMode)((ColorPenMode) mCurrentMode).clone();
-            mRecordManager.addRecord(editMode, false);
-        } else if(mCurrentMode.isMosaicsMode()) {
-            editMode = (MosaicsPenMode)((MosaicsPenMode) mCurrentMode).clone();
-            mRecordManager.addRecord(editMode, false);
-        } else if(mCurrentMode.isTextMode()) {
-            editMode = (TextMode)((TextMode) mCurrentMode).clone();
-            mRecordManager.addRecord(editMode, false);
-        }
-
-        mCurrentMode = mEditMode.get(mode);
-        invalidate();
-        invalidateBtn();
-
-        mCurrentMode.turnOn();
-    }
-    */
 }

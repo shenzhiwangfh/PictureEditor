@@ -18,17 +18,19 @@ import com.nq.pictureeditor.view.OnShowListener;
 import com.nq.pictureeditor.view.Preview;
 
 public class DrawActivity extends AppCompatActivity
-        implements View.OnClickListener, OnShowListener {
+        implements OnShowListener {
 
     public final static String TAG = "DrawActivity";
 
     private DrawView mDrawView;
     private Preview mPreview;
 
+    /*
     private ImageView mSave;
     private ImageView mShare;
     private ImageView mBack;
     private ImageView mForward;
+    */
 
     private CornerLayout mCornerLayout;
     private ArcColorPicker mPenColorPicker;
@@ -42,7 +44,7 @@ public class DrawActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
 
-        initActions();
+        //initActions();
         initControllors();
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
@@ -63,6 +65,7 @@ public class DrawActivity extends AppCompatActivity
     }
     */
 
+    /*
     private void initActions() {
         mSave = findViewById(R.id.save);
         mShare = findViewById(R.id.share);
@@ -76,6 +79,7 @@ public class DrawActivity extends AppCompatActivity
         mBack.setOnClickListener(this);
         mForward.setOnClickListener(this);
     }
+    */
 
     private void initControllors() {
         BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
@@ -95,33 +99,7 @@ public class DrawActivity extends AppCompatActivity
         mController.setPenColorListener(mPenColorPicker);
         mController.setPenSizeListener(mPenSeekBar);
         mController.setMosaicSizeListener(mMosaicsSeekBar);
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        switch (id) {
-            case R.id.save: {
-                mSave.setEnabled(false);
-                mController.saved();
-            }
-            break;
-            case R.id.share: {
-                mShare.setEnabled(false);
-                mController.shared();
-            }
-            break;
-            case R.id.back: {
-                //int mode = mDrawView.goBack();
-                //mCornerLayout.setIndex(mode);
-            }
-            break;
-            case R.id.forward: {
-                //int mode = mDrawView.goForward();
-                //mCornerLayout.setIndex(mode);
-            }
-            break;
-        }
+        mController.initActionBtn(this);
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -92,6 +93,7 @@ public class ArcSeekBar extends View {
         mSliderPaint.setColor(Color.GRAY);
 
         percent = (float) (value - minValue) / (float) (maxValue - minValue);
+        //percent2Position(percent);
     }
 
     @Override
@@ -113,7 +115,7 @@ public class ArcSeekBar extends View {
                 rootPoint.x + arcRadius,
                 rootPoint.y + arcRadius);
 
-        percent2Position(percent);
+        if(touchMode == TOUCH_NULL) percent2Position(percent);
     }
 
     private int measureWidth(int defaultWidth, int measureSpec) {

@@ -12,12 +12,13 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
 import com.nq.pictureeditor.R;
+import com.nq.pictureeditor.record.RecordManager;
 
 public class ClipMode extends EditMode {
-    private float ICON_WIDTH;
-    private float ICON_SIZE;
-    private float LINE_WIDTH;
-    private float CLIP_MIN_SIZE;
+    private static float ICON_WIDTH;
+    private static float ICON_SIZE;
+    private static float LINE_WIDTH;
+    private static float CLIP_MIN_SIZE;
 
     private final static int MODE_NORMAL = 0x10;
     private final static int MODE_PICTURE = 0x11;
@@ -50,12 +51,14 @@ public class ClipMode extends EditMode {
         LINE_WIDTH = res.getDimension(R.dimen.line_width);
         CLIP_MIN_SIZE = res.getDimension(R.dimen.clip_min_size);
 
-        mDrawPaint.setAntiAlias(true);
-        mDrawPaint.setColor(Color.RED);
+        //initClipIcon();
+        initPaint();
     }
 
     public ClipMode(ClipMode o) {
         super(o);
+        initClipIcon();
+        initPaint();
     }
 
     public void setCanvasRect(RectF canvasRect) {
@@ -84,6 +87,11 @@ public class ClipMode extends EditMode {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data, Canvas mDrawCanvas) {
 
+    }
+
+    public void initPaint() {
+        mDrawPaint.setAntiAlias(true);
+        mDrawPaint.setColor(Color.RED);
     }
 
     public void initClipIcon() {
@@ -331,27 +339,7 @@ public class ClipMode extends EditMode {
     @Override
     public void onDraw(Canvas canvas, Bitmap mDrawBitmap) {
         super.onDraw(canvas, mDrawBitmap);
-
-        canvas.save();
-        mDrawPaint.setAlpha(100); // setColor 和 setAlpha 的顺序有关系
-        canvas.drawBitmap(mDrawBitmap, M, mDrawPaint);
-        canvas.restore();
-
-        //draw icon
-        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.right, iconLeftTop.top + ICON_WIDTH, mDrawPaint);
-        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.left + ICON_WIDTH, iconLeftTop.bottom, mDrawPaint);
-        canvas.drawRect(iconRightTop.left, iconRightTop.top, iconRightTop.right, iconLeftTop.top + ICON_WIDTH, mDrawPaint);
-        canvas.drawRect(iconRightTop.right - ICON_WIDTH, iconRightTop.top, iconRightTop.right, iconLeftTop.bottom, mDrawPaint);
-        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.bottom - ICON_WIDTH, iconLeftBottom.right, iconLeftBottom.bottom, mDrawPaint);
-        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.top, iconLeftBottom.left + ICON_WIDTH, iconLeftBottom.bottom, mDrawPaint);
-        canvas.drawRect(iconRightBottom.left, iconRightBottom.bottom - ICON_WIDTH, iconRightBottom.right, iconRightBottom.bottom, mDrawPaint);
-        canvas.drawRect(iconRightBottom.right - ICON_WIDTH, iconRightBottom.top, iconRightBottom.right, iconRightBottom.bottom, mDrawPaint);
-
-        //draw line
-        canvas.drawRect(lineLeft, mDrawPaint);
-        canvas.drawRect(lineRight, mDrawPaint);
-        canvas.drawRect(lineTop, mDrawPaint);
-        canvas.drawRect(lineBottom, mDrawPaint);
+        drawClip(canvas, mDrawBitmap);
     }
 
     @Override
@@ -377,6 +365,7 @@ public class ClipMode extends EditMode {
                 break;
             case MotionEvent.ACTION_UP:
                 cluRect();
+                RecordManager.getInstance().addRecord(new ClipMode(this), false);
                 break;
         }
         return true;
@@ -514,5 +503,28 @@ public class ClipMode extends EditMode {
         picOffsetX = 0;
         picOffsetY = 0;
         setPrePictureRect(pictureRect);
+    }
+
+    private void drawClip(Canvas canvas, Bitmap bitmap) {
+        canvas.save();
+        mDrawPaint.setAlpha(100); // setColor 和 setAlpha 的顺序有关系
+        canvas.drawBitmap(bitmap, M, mDrawPaint);
+        canvas.restore();
+
+        //draw icon
+        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.right, iconLeftTop.top + ICON_WIDTH, mDrawPaint);
+        canvas.drawRect(iconLeftTop.left, iconLeftTop.top, iconLeftTop.left + ICON_WIDTH, iconLeftTop.bottom, mDrawPaint);
+        canvas.drawRect(iconRightTop.left, iconRightTop.top, iconRightTop.right, iconLeftTop.top + ICON_WIDTH, mDrawPaint);
+        canvas.drawRect(iconRightTop.right - ICON_WIDTH, iconRightTop.top, iconRightTop.right, iconLeftTop.bottom, mDrawPaint);
+        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.bottom - ICON_WIDTH, iconLeftBottom.right, iconLeftBottom.bottom, mDrawPaint);
+        canvas.drawRect(iconLeftBottom.left, iconLeftBottom.top, iconLeftBottom.left + ICON_WIDTH, iconLeftBottom.bottom, mDrawPaint);
+        canvas.drawRect(iconRightBottom.left, iconRightBottom.bottom - ICON_WIDTH, iconRightBottom.right, iconRightBottom.bottom, mDrawPaint);
+        canvas.drawRect(iconRightBottom.right - ICON_WIDTH, iconRightBottom.top, iconRightBottom.right, iconRightBottom.bottom, mDrawPaint);
+
+        //draw line
+        canvas.drawRect(lineLeft, mDrawPaint);
+        canvas.drawRect(lineRight, mDrawPaint);
+        canvas.drawRect(lineTop, mDrawPaint);
+        canvas.drawRect(lineBottom, mDrawPaint);
     }
 }

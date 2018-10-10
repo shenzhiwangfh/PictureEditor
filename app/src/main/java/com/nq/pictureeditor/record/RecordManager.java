@@ -8,12 +8,13 @@ import com.nq.pictureeditor.mode.EditMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class RecordManager {
 
     private final static String TAG = "DrawView";
 
-    private SparseArray<EditMode> records = new SparseArray<>();
+    private List<EditMode> records = new ArrayList<>();
     private int index = -1;
     private boolean changed = false;
 
@@ -28,6 +29,10 @@ public class RecordManager {
             mInstance = new RecordManager();
         }
         return mInstance;
+    }
+
+    public void clear() {
+        records.clear();
     }
 
     public void addRecord(EditMode record, boolean force) {
@@ -67,6 +72,7 @@ public class RecordManager {
                     }
                 }
                 */
+                add(record);
                 break;
             case EditMode.MODE_PEN:
             case EditMode.MODE_MOSAICS:
@@ -77,15 +83,23 @@ public class RecordManager {
     }
 
     private void add(EditMode mode) {
-        if(mode.index != -1) {
-            records.remove(mode.index);
+        for (int i = (index + 1); i < records.size(); i++) {
+            records.remove(i);
         }
-        mode.index = ++index;
-        records.put(mode.index, mode);
+
+        if (mode.index != -1) {
+            records.remove(mode.index);
+            for (int i = 0; i < index; i++) {
+                EditMode record = records.get(i);
+                record.index = i;
+            }
+        }
+        mode.index = index = records.size();
+        records.add(mode);
     }
 
     private void replace(EditMode mode) {
-        records.put(mode.index, mode);
+        //records.put(mode.index, mode);
 
         //for (int i = index; i < records.size(); i++) {
         //    records.remove(i);
@@ -130,34 +144,40 @@ public class RecordManager {
     }
 
     public EditMode getPreMode() {
-        int i = index - 1;
-        return records.get(i);
+        return records.get(index - 1);
     }
 
     public EditMode getNextMode() {
-        int i = index + 1;
-        return records.get(i);
+        return records.get(index + 1);
     }
 
-    public SparseArray<EditMode> getRecords() {
+    public List<EditMode> getRecords() {
         return records;
     }
 
-    public void back() {
-        index--;
+    public boolean canBack() {
+        return index > 0;
     }
 
-    public void forward() {
+    public boolean canForward() {
+        return index < (records.size() - 1);
+    }
+
+    public EditMode back() {
+        index--;
+        return records.get(index);
+    }
+
+    public EditMode forward() {
         index++;
+        return records.get(index);
     }
 
     public boolean doLoop(ModeLoopInterface modeLoop) {
         for (int i = 0; i <= index; i++) {
             EditMode mode = records.get(i);
-            if (mode == null) continue;
             if (modeLoop.pickMode(mode)) return false; //if break, doLoop return false;
         }
-
         return true;
     }
 }

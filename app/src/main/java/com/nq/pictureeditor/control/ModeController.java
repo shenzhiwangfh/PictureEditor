@@ -1,16 +1,21 @@
 package com.nq.pictureeditor.control;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.media.Image;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import com.nq.pictureeditor.view.DrawInterface;
 import com.nq.pictureeditor.R;
@@ -30,7 +35,7 @@ import com.nq.pictureeditor.view.DrawView;
 import com.nq.pictureeditor.view.ViewUtils;
 
 public class ModeController implements
-        CornerLayout.OnModeListener, DrawInterface {
+        CornerLayout.OnModeListener, DrawInterface, View.OnClickListener {
 
     private Context mContext;
 
@@ -48,7 +53,13 @@ public class ModeController implements
 
     private RecordManager mRecordManager;// = new RecordManager();
     private Handler mHandler;
+
+    private ImageView mSave;
+    private ImageView mShare;
+    private ImageView mBack;
+    private ImageView mForward;
     private DrawView mDrawView;
+    private CornerLayout mCornerLayout;
 
     public ModeController(Context context, Bitmap bitmap) {
         mContext = context;
@@ -70,10 +81,28 @@ public class ModeController implements
         textMode.set(clipMode);
 
         mRecordManager = RecordManager.getInstance();
+        mRecordManager.clear();
         mRecordManager.addRecord(new ClipMode(clipMode), false);
     }
 
-    public void initBitmap(Context context, Bitmap bitmap, ClipMode clipMode) {
+    public void initActionBtn(Activity activity) {
+        mSave = activity.findViewById(R.id.save);
+        mShare = activity.findViewById(R.id.share);
+        mBack = activity.findViewById(R.id.back);
+        mForward = activity.findViewById(R.id.forward);
+
+        mBack.setEnabled(false);
+        mForward.setEnabled(false);
+        mSave.setOnClickListener(this);
+        mShare.setOnClickListener(this);
+        mBack.setOnClickListener(this);
+        mForward.setOnClickListener(this);
+
+        refreshBtn();
+        //redraw();
+    }
+
+    private void initBitmap(Context context, Bitmap bitmap, ClipMode clipMode) {
         mOriginBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         mDrawBitmap = Bitmap.createBitmap(mOriginBitmap);
         mDrawCanvas.setBitmap(mDrawBitmap);
@@ -119,6 +148,41 @@ public class ModeController implements
     }
 
     @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id) {
+            case R.id.save: {
+                mSave.setEnabled(false);
+                saved();
+            }
+            break;
+            case R.id.share: {
+                mShare.setEnabled(false);
+                shared();
+            }
+            break;
+            case R.id.back: {
+                mCurrentMode = mRecordManager.back();
+                mCornerLayout.setIndex(mCurrentMode.getMode());
+                //clipMode.set(mode);
+                //onChange(mCurrentMode.getMode());
+                refreshBtn();
+                redraw();
+            }
+            break;
+            case R.id.forward: {
+                mCurrentMode = mRecordManager.forward();
+                mCornerLayout.setIndex(mCurrentMode.getMode());
+                //clipMode.set(mode);
+                //onChange(mCurrentMode.getMode());
+                refreshBtn();
+                redraw();
+            }
+            break;
+        }
+    }
+
+    @Override
     public void onTouchEvent(MotionEvent event) {
         if (mCurrentMode.isTextMode()) {
             mCurrentMode.onTouchEvent(event, mDrawCanvas);
@@ -128,6 +192,10 @@ public class ModeController implements
             mCurrentMode.onTouchEvent(event, mDrawCanvas);
         } else {
             mCurrentMode.onTouchEvent(event, mDrawCanvas);
+        }
+
+        if(event.getAction() == MotionEvent.ACTION_UP) {
+            refreshBtn();
         }
     }
 
@@ -155,6 +223,8 @@ public class ModeController implements
                 return false;
             }
         });
+
+        mDrawView.invalidate();
     }
 
     @Override
@@ -189,6 +259,7 @@ public class ModeController implements
     }
 
     public void setModeChangeListener(CornerLayout layout) {
+        mCornerLayout = layout;
         layout.setOnModeListener(this);
     }
 
@@ -212,5 +283,10 @@ public class ModeController implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         mCurrentMode.onActivityResult(requestCode, resultCode, data, mDrawCanvas);
         redraw();
+    }
+
+    private void refreshBtn() {
+        mBack.setEnabled(mRecordManager.canBack());
+        mForward.setEnabled(mRecordManager.canForward());
     }
 }
