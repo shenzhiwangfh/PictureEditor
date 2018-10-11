@@ -63,8 +63,11 @@ public class ModeController implements
 
     public ModeController(Context context, Bitmap bitmap) {
         mContext = context;
+        mOriginBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        mDrawBitmap = Bitmap.createBitmap(mOriginBitmap);
+        mDrawCanvas.setBitmap(mDrawBitmap);
 
-        clipMode = new ClipMode(context);
+        clipMode = new ClipMode(context, bitmap);
         colorPenMode = new ColorPenMode(context, mHandler);
         mosaicsPenMode = new MosaicsPenMode(context, mHandler, bitmap);
         textMode = new TextMode(context, mHandler);
@@ -75,7 +78,6 @@ public class ModeController implements
         map.put(EditMode.MODE_TEXT, textMode);
         mCurrentMode = clipMode;
 
-        initBitmap(context, bitmap, clipMode);
         colorPenMode.set(clipMode);
         mosaicsPenMode.set(clipMode);
         textMode.set(clipMode);
@@ -99,52 +101,6 @@ public class ModeController implements
         mForward.setOnClickListener(this);
 
         refreshBtn();
-        //redraw();
-    }
-
-    private void initBitmap(Context context, Bitmap bitmap, ClipMode clipMode) {
-        mOriginBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-        mDrawBitmap = Bitmap.createBitmap(mOriginBitmap);
-        mDrawCanvas.setBitmap(mDrawBitmap);
-        //mMosaicBmp = ViewUtils.BitmapMosaic(mDrawBitmap, 64);
-
-        Resources res = context.getResources();
-        DisplayMetrics dm = res.getDisplayMetrics();
-        final int screenWidth = dm.widthPixels;
-        final int screenHeight = dm.heightPixels;
-
-        RectF canvasRect, originRect;
-        final float leftPadding = res.getDimension(R.dimen.picture_left_padding);
-        final float topPadding = res.getDimension(R.dimen.picture_top_padding);
-        final float rightPadding = res.getDimension(R.dimen.picture_right_padding);
-        final float bottomPadding = res.getDimension(R.dimen.picture_bottom_padding);
-        canvasRect = new RectF(leftPadding, topPadding, screenWidth - rightPadding, screenHeight - bottomPadding);
-
-        float bitmapRatio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
-        float canvasRatio = canvasRect.height() / canvasRect.width();
-        if (bitmapRatio > canvasRatio) {
-            //long picture
-            float width = canvasRect.height() / bitmapRatio;
-            float left = canvasRect.left + ((canvasRect.width() - width) / 2);
-            originRect = new RectF(left, canvasRect.top, left + width, canvasRect.bottom);
-        } else {
-            //normal picture
-            float height = canvasRect.width() * bitmapRatio;
-            float top = canvasRect.top + ((canvasRect.height() - height) / 2);
-            originRect = new RectF(canvasRect.left, top, canvasRect.right, top + height);
-        }
-        float mZoomScale = originRect.height() / bitmap.getHeight();
-
-        clipMode.setBitmapRect(mOriginBitmap);
-        clipMode.setPrePictureRect(originRect);
-        clipMode.setPictureRect(mZoomScale);
-        clipMode.setClipPictureRect(canvasRect);
-        clipMode.setClipBitmapRect();
-        clipMode.matrix();
-
-        clipMode.setCanvasRect(canvasRect);
-        clipMode.initClipIcon();
-        //clipMode.setZoomScale(mZoomScale);
     }
 
     @Override
@@ -162,19 +118,57 @@ public class ModeController implements
             }
             break;
             case R.id.back: {
-                mCurrentMode = mRecordManager.back();
-                mCornerLayout.setIndex(mCurrentMode.getMode());
-                //clipMode.set(mode);
-                //onChange(mCurrentMode.getMode());
+                if (mRecordManager.canBack()) {
+                    EditMode mode = mRecordManager.back();
+                    mCornerLayout.setIndex(mode.getMode());
+
+                    switch (mode.getMode()) {
+                        case EditMode.MODE_CLIP:
+                            clipMode.setClipMode((ClipMode) mode);
+                            mCurrentMode = clipMode;
+                            break;
+                        case EditMode.MODE_PEN:
+                            colorPenMode.setColorPenMode((ColorPenMode) mode);
+                            mCurrentMode = colorPenMode;
+                            break;
+                        case EditMode.MODE_MOSAICS:
+                            mosaicsPenMode.setMosaicsPenMode((MosaicsPenMode) mode);
+                            mCurrentMode = mosaicsPenMode;
+                            break;
+                        case EditMode.MODE_TEXT:
+                            textMode.setTextMode((TextMode) mode);
+                            mCurrentMode = textMode;
+                            break;
+                    }
+                }
                 refreshBtn();
                 redraw();
             }
             break;
             case R.id.forward: {
-                mCurrentMode = mRecordManager.forward();
-                mCornerLayout.setIndex(mCurrentMode.getMode());
-                //clipMode.set(mode);
-                //onChange(mCurrentMode.getMode());
+                if (mRecordManager.canForward()) {
+                    EditMode mode = mRecordManager.forward();
+                    mCornerLayout.setIndex(mode.getMode());
+
+                    switch (mode.getMode()) {
+                        case EditMode.MODE_CLIP:
+                            clipMode.setClipMode((ClipMode) mode);
+                            mCurrentMode = clipMode;
+                            break;
+                        case EditMode.MODE_PEN:
+                            colorPenMode.setColorPenMode((ColorPenMode) mode);
+                            mCurrentMode = colorPenMode;
+                            break;
+                        case EditMode.MODE_MOSAICS:
+                            mosaicsPenMode.setMosaicsPenMode((MosaicsPenMode) mode);
+                            mCurrentMode = mosaicsPenMode;
+                            break;
+                        case EditMode.MODE_TEXT:
+                            textMode.setTextMode((TextMode) mode);
+                            mCurrentMode = textMode;
+                            break;
+                    }
+                }
                 refreshBtn();
                 redraw();
             }
@@ -194,7 +188,7 @@ public class ModeController implements
             mCurrentMode.onTouchEvent(event, mDrawCanvas);
         }
 
-        if(event.getAction() == MotionEvent.ACTION_UP) {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
             refreshBtn();
         }
     }
@@ -282,6 +276,7 @@ public class ModeController implements
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         mCurrentMode.onActivityResult(requestCode, resultCode, data, mDrawCanvas);
+        refreshBtn();
         redraw();
     }
 

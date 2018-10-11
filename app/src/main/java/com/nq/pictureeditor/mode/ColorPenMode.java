@@ -31,6 +31,12 @@ public class ColorPenMode extends PenMode {
         super(o);
     }
 
+    public void setColorPenMode(ColorPenMode mode) {
+        super.set(mode);
+        this.mDrawPath.set(mode.mDrawPath);
+        this.mDrawPaint.set(mode.mDrawPaint);
+    }
+
     @Override
     public int getMode() {
         return MODE_PEN;

@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -15,43 +16,37 @@ import com.nq.pictureeditor.R;
 import com.nq.pictureeditor.record.RecordManager;
 
 public class ClipMode extends EditMode {
-    private static float ICON_WIDTH;
-    private static float ICON_SIZE;
-    private static float LINE_WIDTH;
-    private static float CLIP_MIN_SIZE;
+    private final float ICON_WIDTH = 54f;
+    private final float ICON_SIZE = 96f;
+    private final float LINE_WIDTH = 36;
+    private final float CLIP_MIN_SIZE = 96f;
 
-    private final static int MODE_NORMAL = 0x10;
-    private final static int MODE_PICTURE = 0x11;
-    private final static int MODE_SCALE = 0x12;
-    private final static int MODE_LT_ICON = 0x13;
-    private final static int MODE_RT_ICON = 0x14;
-    private final static int MODE_LB_ICON = 0x15;
-    private final static int MODE_RB_ICON = 0x16;
-    private final static int MODE_L_LINE = 0x17;
-    private final static int MODE_R_LINE = 0x18;
-    private final static int MODE_T_LINE = 0x19;
-    private final static int MODE_B_LINE = 0x1A;
+    private final int MODE_NORMAL = 0x10;
+    private final int MODE_PICTURE = 0x11;
+    private final int MODE_SCALE = 0x12;
+    private final int MODE_LT_ICON = 0x13;
+    private final int MODE_RT_ICON = 0x14;
+    private final int MODE_LB_ICON = 0x15;
+    private final int MODE_RB_ICON = 0x16;
+    private final int MODE_L_LINE = 0x17;
+    private final int MODE_R_LINE = 0x18;
+    private final int MODE_T_LINE = 0x19;
+    private final int MODE_B_LINE = 0x1A;
 
     public boolean status = true;
 
     private RectF clipIconRect;
     private RectF iconLeftTop, iconRightTop, iconLeftBottom, iconRightBottom;
     private RectF lineLeft, lineRight, lineTop, lineBottom;
-    private static RectF canvasRect = new RectF();
+    private RectF canvasRect = new RectF();
 
     private int clipMode;
-    //private Paint mPaint = new Paint();
 
-    public ClipMode(Context context) {
+    public ClipMode(Context context, Bitmap bitmap) {
         super(context);
 
-        Resources res = context.getResources();
-        ICON_WIDTH = res.getDimension(R.dimen.icon_width);
-        ICON_SIZE = res.getDimension(R.dimen.icon_size);
-        LINE_WIDTH = res.getDimension(R.dimen.line_width);
-        CLIP_MIN_SIZE = res.getDimension(R.dimen.clip_min_size);
-
-        //initClipIcon();
+        initBitmap(context, bitmap);
+        initClipIcon();
         initPaint();
     }
 
@@ -59,10 +54,13 @@ public class ClipMode extends EditMode {
         super(o);
         initClipIcon();
         initPaint();
+        this.canvasRect.set(o.canvasRect);
     }
 
-    public void setCanvasRect(RectF canvasRect) {
-        ClipMode.canvasRect.set(canvasRect);
+    public void setClipMode(ClipMode o) {
+        super.set(o);
+        initClipIcon();
+        initPaint();
     }
 
     public void setStatus(boolean status) {
@@ -89,6 +87,44 @@ public class ClipMode extends EditMode {
 
     }
 
+    private void initBitmap(Context context, Bitmap bitmap) {
+        Resources res = context.getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        final int screenWidth = dm.widthPixels;
+        final int screenHeight = dm.heightPixels;
+
+        RectF originRect;
+        final float leftPadding = res.getDimension(R.dimen.picture_left_padding);
+        final float topPadding = res.getDimension(R.dimen.picture_top_padding);
+        final float rightPadding = res.getDimension(R.dimen.picture_right_padding);
+        final float bottomPadding = res.getDimension(R.dimen.picture_bottom_padding);
+        canvasRect.set(leftPadding, topPadding, screenWidth - rightPadding, screenHeight - bottomPadding);
+
+        float bitmapRatio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
+        float canvasRatio = canvasRect.height() / canvasRect.width();
+        if (bitmapRatio > canvasRatio) {
+            //long picture
+            float width = canvasRect.height() / bitmapRatio;
+            float left = canvasRect.left + ((canvasRect.width() - width) / 2);
+            originRect = new RectF(left, canvasRect.top, left + width, canvasRect.bottom);
+        } else {
+            //normal picture
+            float height = canvasRect.width() * bitmapRatio;
+            float top = canvasRect.top + ((canvasRect.height() - height) / 2);
+            originRect = new RectF(canvasRect.left, top, canvasRect.right, top + height);
+        }
+        float mZoomScale = originRect.height() / bitmap.getHeight();
+
+        setBitmapRect(bitmap);
+        setPrePictureRect(originRect);
+        setPictureRect(mZoomScale);
+        setClipPictureRect(canvasRect);
+        setClipBitmapRect();
+        matrix();
+
+        //setCanvasRect(canvasRect);
+    }
+
     public void initPaint() {
         mDrawPaint.setAntiAlias(true);
         mDrawPaint.setColor(Color.RED);
@@ -112,19 +148,19 @@ public class ClipMode extends EditMode {
             right = clipPictureRect.right + ICON_WIDTH;
             bottom = clipPictureRect.bottom + ICON_WIDTH;
             clipIconRect = new RectF(left, top, right, bottom);
-        } else if (clipMode == ClipMode.MODE_LT_ICON) {
+        } else if (clipMode == MODE_LT_ICON) {
             left = offsetX + clipPictureRect.left - ICON_WIDTH;
             top = offsetY + clipPictureRect.top - ICON_WIDTH;
             clipIconRect.set(left, top, clipIconRect.right, clipIconRect.bottom);
-        } else if (clipMode == ClipMode.MODE_RT_ICON) {
+        } else if (clipMode == MODE_RT_ICON) {
             right = offsetX + clipPictureRect.right + ICON_WIDTH;
             top = offsetY + clipPictureRect.top - ICON_WIDTH;
             clipIconRect.set(clipIconRect.left, top, right, clipIconRect.bottom);
-        } else if (clipMode == ClipMode.MODE_LB_ICON) {
+        } else if (clipMode == MODE_LB_ICON) {
             left = offsetX + clipPictureRect.left - ICON_WIDTH;
             bottom = offsetY + clipPictureRect.bottom + ICON_WIDTH;
             clipIconRect.set(left, clipIconRect.top, clipIconRect.right, bottom);
-        } else if (clipMode == ClipMode.MODE_RB_ICON) {
+        } else if (clipMode == MODE_RB_ICON) {
             right = offsetX + clipPictureRect.right + ICON_WIDTH;
             bottom = offsetY + clipPictureRect.bottom + ICON_WIDTH;
             clipIconRect.set(clipIconRect.left, clipIconRect.top, right, bottom);
@@ -238,30 +274,30 @@ public class ClipMode extends EditMode {
 
     private void computeClipMode(float downX, float downY) {
         if (iconLeftTop.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_LT_ICON;
+            clipMode = MODE_LT_ICON;
         } else if (iconRightTop.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_RT_ICON;
+            clipMode = MODE_RT_ICON;
         } else if (iconLeftBottom.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_LB_ICON;
+            clipMode = MODE_LB_ICON;
         } else if (iconRightBottom.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_RB_ICON;
+            clipMode = MODE_RB_ICON;
         } else if (lineLeft.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_L_LINE;
+            clipMode = MODE_L_LINE;
         } else if (lineRight.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_R_LINE;
+            clipMode = MODE_R_LINE;
         } else if (lineTop.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_T_LINE;
+            clipMode = MODE_T_LINE;
         } else if (lineBottom.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_B_LINE;
+            clipMode = MODE_B_LINE;
         } else if (clipPictureRect.contains(downX, downY)) {
-            clipMode = ClipMode.MODE_PICTURE;
+            clipMode = MODE_PICTURE;
         }
         //return clipMode;
     }
 
     private void computeIcon(float nowX, float nowY, float downX, float downY,
                              RectF canvasRect, RectF pictureRect, RectF clipPictureRect) {
-        if (clipMode == ClipMode.MODE_LT_ICON) {
+        if (clipMode == MODE_LT_ICON) {
             float clipOffsetX = nowX - downX;
             float clipOffsetY = nowY - downY;
 
@@ -279,7 +315,7 @@ public class ClipMode extends EditMode {
                 clipOffsetY = top - clipPictureRect.top;
 
             setClipIconRect(clipOffsetX, clipOffsetY, clipPictureRect);
-        } else if (clipMode == ClipMode.MODE_RT_ICON) {
+        } else if (clipMode == MODE_RT_ICON) {
             float clipOffsetX = nowX - downX;
             float clipOffsetY = nowY - downY;
 
@@ -297,7 +333,7 @@ public class ClipMode extends EditMode {
                 clipOffsetY = top - clipPictureRect.top;
 
             setClipIconRect(clipOffsetX, clipOffsetY, clipPictureRect);
-        } else if (clipMode == ClipMode.MODE_LB_ICON) {
+        } else if (clipMode == MODE_LB_ICON) {
             float clipOffsetX = nowX - downX;
             float clipOffsetY = nowY - downY;
 
@@ -315,7 +351,7 @@ public class ClipMode extends EditMode {
                 clipOffsetY = bottom - clipPictureRect.bottom;
 
             setClipIconRect(clipOffsetX, clipOffsetY, clipPictureRect);
-        } else if (clipMode == ClipMode.MODE_RB_ICON) {
+        } else if (clipMode == MODE_RB_ICON) {
             float clipOffsetX = nowX - downX;
             float clipOffsetY = nowY - downY;
 
@@ -352,10 +388,10 @@ public class ClipMode extends EditMode {
                 computeClipMode(downX, downY);
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (clipMode >= ClipMode.MODE_LT_ICON && clipMode <= ClipMode.MODE_B_LINE) {
+                if (clipMode >= MODE_LT_ICON && clipMode <= MODE_B_LINE) {
                     computeIcon(event.getX(), event.getY(), downX, downY,
                             canvasRect, pictureRect, clipPictureRect);
-                } else if (clipMode == ClipMode.MODE_PICTURE) {
+                } else if (clipMode == MODE_PICTURE) {
                     picOffsetX = event.getX() - downX;
                     picOffsetY = event.getY() - downY;
 
@@ -395,7 +431,7 @@ public class ClipMode extends EditMode {
 
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
-        clipMode = ClipMode.MODE_SCALE;
+        clipMode = MODE_SCALE;
         return true;
     }
 
@@ -405,8 +441,8 @@ public class ClipMode extends EditMode {
     }
 
     private void cluRect() {
-        if (clipMode == ClipMode.MODE_SCALE) {
-            clipMode = ClipMode.MODE_NORMAL;
+        if (clipMode == MODE_SCALE) {
+            clipMode = MODE_NORMAL;
 
             float widthScale = 1.0f, heightScale = 1.0f;
             if (clipPictureRect.width() > pictureRect.width()) {
@@ -439,8 +475,8 @@ public class ClipMode extends EditMode {
             setClipBitmapRect();
             matrix();
             //invalidate();
-        } else if (clipMode == ClipMode.MODE_PICTURE) {
-            clipMode = ClipMode.MODE_NORMAL;
+        } else if (clipMode == MODE_PICTURE) {
+            clipMode = MODE_NORMAL;
 
             if (pictureRect.left > clipPictureRect.left) {
                 picOffsetX = picOffsetX + clipPictureRect.left - pictureRect.left;
@@ -458,9 +494,9 @@ public class ClipMode extends EditMode {
             setPictureRect(mZoomScale);
             setClipBitmapRect();
             matrix();
-        } else if (clipMode >= ClipMode.MODE_LT_ICON && clipMode <= ClipMode.MODE_B_LINE) {
+        } else if (clipMode >= MODE_LT_ICON && clipMode <= MODE_B_LINE) {
             //把裁剪区域放大后，计算picture 的rect，其他就全部可以顺势算出了
-            clipMode = ClipMode.MODE_NORMAL;
+            clipMode = MODE_NORMAL;
 
             float left, top, right, bottom;
             RectF tmpClip = new RectF(clipIconRect.left + ICON_WIDTH,

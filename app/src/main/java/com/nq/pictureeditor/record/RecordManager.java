@@ -1,5 +1,6 @@
 package com.nq.pictureeditor.record;
 
+import android.util.Log;
 import android.util.SparseArray;
 import android.widget.EditText;
 
@@ -40,38 +41,16 @@ public class RecordManager {
 
         switch (record.getMode()) {
             case EditMode.MODE_CLIP:
-                /*
-                if (records.isEmpty()) {
-                    ClipMode nowClipMode = (ClipMode) record;
-                    //nowClipMode.status = 0;
-                    add(nowClipMode);
-                } else {
-                    EditMode editMode = getCurrentMode();
-                    if(editMode instanceof ClipMode) {
-                        ClipMode nowClipMode = (ClipMode) mode;
-                        ClipMode lastClipMode = (ClipMode) editMode;
-
-                        if (nowClipMode.pictureRect.equals(lastClipMode.pictureRect) &&
-                                nowClipMode.clipPictureRect.equals(lastClipMode.clipPictureRect)) {
-                            //
-                        } else {
-                            if(lastClipMode.status) {
-                                //nowClipMode.status = lastClipMode.status;
-                                //replace(nowClipMode);
-                                add(nowClipMode);
-                            } else {
-                                //nowClipMode.status = lastClipMode.status + 1;
-                                //add(nowClipMode);
-                                replace(nowClipMode);
-                            }
-                        }
-                    } else {
-                        ClipMode nowClipMode = (ClipMode) mode;
-                        //nowClipMode.status = 0;
-                        add(nowClipMode);
+                if(records.size() > 0) {
+                    EditMode mode = getCurrentMode();
+                    if (mode instanceof ClipMode) {
+                        ClipMode clipMode1 = (ClipMode) mode;
+                        ClipMode clipMode2 = (ClipMode) record;
+                        boolean same = clipMode1.pictureRect.equals(clipMode2.pictureRect) &&
+                                clipMode1.clipPictureRect.equals(clipMode2.clipPictureRect);
+                        if (same) break;
                     }
                 }
-                */
                 add(record);
                 break;
             case EditMode.MODE_PEN:
@@ -83,9 +62,9 @@ public class RecordManager {
     }
 
     private void add(EditMode mode) {
-        for (int i = (index + 1); i < records.size(); i++) {
-            records.remove(i);
-        }
+        while (records.size() > (index + 1)) {
+            records.remove(index + 1);
+        } //remove end records
 
         if (mode.index != -1) {
             records.remove(mode.index);
@@ -98,26 +77,17 @@ public class RecordManager {
         records.add(mode);
     }
 
-    private void replace(EditMode mode) {
-        //records.put(mode.index, mode);
+    public void remove(int removeIndex) {
+        if(removeIndex >= 0 && removeIndex <= index) {
+            records.remove(removeIndex);
+            index--;
 
-        //for (int i = index; i < records.size(); i++) {
-        //    records.remove(i);
-        //}
-    }
-
-    /*
-    private ClipMode getLastClipMode() {
-        ClipMode clipMode = null;
-        for (int i = (records.size() - 1); i >= 0; i--) {
-            EditMode mode = records.get(i);
-            if (mode.getMode() == EditMode.MODE_CLIP) {
-                clipMode = (ClipMode) mode;
+            for (int i = 0; i < index; i++) {
+                EditMode record = records.get(i);
+                record.index = i;
             }
         }
-        return clipMode;
     }
-    */
 
     public void setChanged(boolean changed) {
         this.changed = changed;

@@ -2,4 +2,7 @@
     <string name="app_name">图片编辑器</string>
     <string name="cancel">取消</string>
     <string name="done">完成</string>
+    <string name="delete">删除</string>
+    <string name="delete_title">提醒</string>
+    <string name="delete_tips">确定删除该字串吗？</string>
 </resources>

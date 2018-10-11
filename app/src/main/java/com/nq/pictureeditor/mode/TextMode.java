@@ -28,9 +28,10 @@ public class TextMode extends EditMode {
     public final static int REQUEST_CODE = 0;
     public final static int RESULT_CANCEL = 0;
     public final static int RESULT_SELECT = 1;
+    public final static int RESULT_DELETE = 2;
 
-    private final static int DEFAULT_COLOR = Color.BLACK;
-    private final static int DEFAULT_SIZE = 16;
+    public final static int DEFAULT_COLOR = Color.BLACK;
+    public final static int DEFAULT_SIZE = 30;
 
     private String text = null;
     private Point mapped;
@@ -77,6 +78,10 @@ public class TextMode extends EditMode {
         this.index = o.index;
         this.color = o.color;
         this.size = o.size;
+    }
+
+    public void setTextMode(TextMode mode) {
+        super.set(mode);
     }
 
     @Override
@@ -171,6 +176,11 @@ public class TextMode extends EditMode {
                         drawText(mDrawCanvas, text, mapped, mTextPaint);
                         RecordManager.getInstance().addRecord(new TextMode(this), false);
                     }
+                }
+            } else if (resultCode == RESULT_DELETE) {
+                if (data != null) {
+                    index = data.getIntExtra("index", -1);
+                    RecordManager.getInstance().remove(index);
                 }
             }
         }

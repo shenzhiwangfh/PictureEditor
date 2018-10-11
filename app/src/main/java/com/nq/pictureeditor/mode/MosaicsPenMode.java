@@ -41,6 +41,12 @@ public class MosaicsPenMode extends PenMode {
         //mDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
     }
 
+    public void setMosaicsPenMode(MosaicsPenMode mode) {
+        super.set(mode);
+        this.mDrawPath.set(mode.mDrawPath);
+        this.mDrawPaint.set(mode.mDrawPaint);
+    }
+
     @Override
     public int getMode() {
         return MODE_MOSAICS;

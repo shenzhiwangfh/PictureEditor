@@ -93,7 +93,7 @@ public class ArcColorPicker extends View {
             int resId = array.getResourceId(i, 0);
             colors[i] = a.getResources().getColor(resId, null);
 
-            if(defauleValue == colors[i]) mIndex = i;
+            if (defauleValue == colors[i]) mIndex = i;
         }
         array.recycle();
 
@@ -149,6 +149,14 @@ public class ArcColorPicker extends View {
 
         rootPoint.x = getPaddingStart() + colorRadius;
         rootPoint.y = size - getPaddingBottom() - colorRadius;
+
+        /*
+        if(touchMode == TOUCH_NULL) {
+            for (int i = 0; i < colors.length; i++) {
+                if(defauleValue == colors[i]) mIndex = i;
+            }
+        }
+        */
     }
 
     private int measureWidth(int defaultWidth, int measureSpec) {
@@ -321,5 +329,12 @@ public class ArcColorPicker extends View {
 
     public int getDefauleColor() {
         return defauleValue;
+    }
+
+    public void setColor(int color) {
+        for (int i = 0; i < colors.length; i++) {
+            if (color == colors[i]) mIndex = i;
+        }
+        invalidate();
     }
 }

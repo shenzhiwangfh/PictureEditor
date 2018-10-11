@@ -115,7 +115,7 @@ public class ArcSeekBar extends View {
                 rootPoint.x + arcRadius,
                 rootPoint.y + arcRadius);
 
-        if(touchMode == TOUCH_NULL) percent2Position(percent);
+        if (touchMode == TOUCH_NULL) percent2Position(percent);
     }
 
     private int measureWidth(int defaultWidth, int measureSpec) {
@@ -170,7 +170,7 @@ public class ArcSeekBar extends View {
                 touchMode = TOUCH_NULL;
                 if (ViewUtils.contain(sliderPoint, sliderRadius, downX, downY, 30)) {
                     touchMode = TOUCH_SLIDER;
-                    if(showListener != null) showListener.onShow(this, true);
+                    if (showListener != null) showListener.onShow(this, true);
                 }
             }
             break;
@@ -187,10 +187,10 @@ public class ArcSeekBar extends View {
                         //(y <= rootPoint.y) &&
                         (touchMode == TOUCH_SLIDER)) {
 
-                    if(x < rootPoint.x) x = rootPoint.x;
-                    if(x > rootPoint.x + arcRadius) x = rootPoint.x + arcRadius;
-                    if(y < rootPoint.y - arcRadius) y = rootPoint.y - arcRadius;
-                    if(y > rootPoint.y) y = rootPoint.y;
+                    if (x < rootPoint.x) x = rootPoint.x;
+                    if (x > rootPoint.x + arcRadius) x = rootPoint.x + arcRadius;
+                    if (y < rootPoint.y - arcRadius) y = rootPoint.y - arcRadius;
+                    if (y > rootPoint.y) y = rootPoint.y;
 
                     float p = position2percent(x, y);
                     percent2Position(p);
@@ -202,7 +202,7 @@ public class ArcSeekBar extends View {
             }
             break;
             case MotionEvent.ACTION_UP: {
-                if(showListener != null) showListener.onShow(this, false);
+                if (showListener != null) showListener.onShow(this, false);
             }
             break;
         }
@@ -233,5 +233,11 @@ public class ArcSeekBar extends View {
 
     public int getDefaultSize() {
         return defaultValue;
+    }
+
+    public void setSize(int size) {
+        percent = (float) (size - minValue) / (float) (maxValue - minValue);
+        percent2Position(percent);
+        invalidate();
     }
 }
