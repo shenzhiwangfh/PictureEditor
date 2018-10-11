@@ -5,4 +5,8 @@
     <string name="delete">删除</string>
     <string name="delete_title">提醒</string>
     <string name="delete_tips">确定删除该字串吗？</string>
+
+    <string name="tips">点击深灰色区域选择图片</string>
+    <string name="before">编辑前</string>
+    <string name="after">编辑后</string>
 </resources>

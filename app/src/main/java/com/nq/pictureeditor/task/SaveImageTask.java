@@ -1,14 +1,15 @@
-package com.nq.pictureeditor;
+package com.nq.pictureeditor.task;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.widget.Toast;
 
+import com.nq.pictureeditor.Utils;
 import com.nq.pictureeditor.view.DrawInterface;
 
 import java.io.File;
@@ -17,17 +18,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 
-public class ShareImageTask extends AsyncTask<Bitmap, Integer, Uri> {
+public class SaveImageTask extends AsyncTask<Bitmap, Integer, String> {
     private WeakReference<Context> mContext;
-    private DrawInterface draw;
+    private SaveListener listener;
 
-    public ShareImageTask(Context context, DrawInterface draw) {
+    public SaveImageTask(Context context, SaveListener listener) {
         this.mContext = new WeakReference<>(context);
-        this.draw = draw;
+        this.listener = listener;
     }
 
     @Override
-    protected Uri doInBackground(Bitmap... bitmaps) {
+    protected String doInBackground(Bitmap... bitmaps) {
         Context context = mContext.get();
 
         String imagePath = Utils.createScreenName();
@@ -52,40 +53,18 @@ public class ShareImageTask extends AsyncTask<Bitmap, Integer, Uri> {
             values.put(MediaStore.Images.ImageColumns.HEIGHT, bitmap.getHeight());
             values.put(MediaStore.Images.ImageColumns.SIZE, file.length());
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            return uri;
+            //return uri;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //return imagePath;
-
-        return null;
+        return imagePath;
     }
 
     @Override
-    protected void onPostExecute(Uri uri) {
+    protected void onPostExecute(String imagePath) {
+        if (listener != null) listener.saved();
+
         Context context = mContext.get();
-        //Toast.makeText(context, imagePath, Toast.LENGTH_LONG).show();
-        if (uri == null) {
-            return;
-        }
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        //if (subject != null && !"".equals(subject)) {
-        //    intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        //}
-        //if (content != null && !"".equals(content)) {
-        //    intent.putExtra(Intent.EXTRA_TEXT, content);
-        //}
-
-        // 设置弹出框标题
-        //if (dlgTitle != null && !"".equals(dlgTitle)) { // 自定义标题
-        //    context.startActivity(Intent.createChooser(intent, dlgTitle));
-        //} else { // 系统默认标题
-            context.startActivity(intent);
-        //}
-
-        //if(draw != null) draw.shared();
+        Toast.makeText(context, imagePath, Toast.LENGTH_LONG).show();
     }
 }
-

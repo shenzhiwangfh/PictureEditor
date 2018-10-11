@@ -3,24 +3,22 @@ package com.nq.pictureeditor.control;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.RectF;
-import android.media.Image;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
+import com.nq.pictureeditor.DrawActivity;
+import com.nq.pictureeditor.PickPicture;
+import com.nq.pictureeditor.task.SaveListener;
 import com.nq.pictureeditor.view.DrawInterface;
 import com.nq.pictureeditor.R;
-import com.nq.pictureeditor.SaveImageTask;
-import com.nq.pictureeditor.ShareImageTask;
+import com.nq.pictureeditor.task.SaveImageTask;
+import com.nq.pictureeditor.task.ShareImageTask;
 import com.nq.pictureeditor.mode.ClipMode;
 import com.nq.pictureeditor.mode.ColorPenMode;
 import com.nq.pictureeditor.mode.EditMode;
@@ -32,10 +30,9 @@ import com.nq.pictureeditor.view.ArcColorPicker;
 import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.CornerLayout;
 import com.nq.pictureeditor.view.DrawView;
-import com.nq.pictureeditor.view.ViewUtils;
 
 public class ModeController implements
-        CornerLayout.OnModeListener, DrawInterface, View.OnClickListener {
+        CornerLayout.OnModeListener, DrawInterface, View.OnClickListener, SaveListener {
 
     private Context mContext;
 
@@ -109,12 +106,12 @@ public class ModeController implements
         switch (id) {
             case R.id.save: {
                 mSave.setEnabled(false);
-                saved();
+                save();
             }
             break;
             case R.id.share: {
                 mShare.setEnabled(false);
-                shared();
+                share();
             }
             break;
             case R.id.back: {
@@ -193,16 +190,27 @@ public class ModeController implements
         }
     }
 
-    public void saved() {
+    public void save() {
+        disableBtn();
+
         redraw();
         Bitmap newBitmap = mCurrentMode.saveBitmap(mDrawBitmap);
         new SaveImageTask(mContext, this).execute(newBitmap);
     }
 
-    public void shared() {
+    public void share() {
+        disableBtn();
+
         redraw();
         Bitmap newBitmap = mCurrentMode.saveBitmap(mDrawBitmap);
         new ShareImageTask(mContext, this).execute(newBitmap);
+    }
+
+    @Override
+    public void saved() {
+        resetBtn();
+        ((DrawActivity) mContext).setResult(PickPicture.RESULT_OK);
+        ((DrawActivity) mContext).finish();
     }
 
     private void redraw() {
@@ -283,5 +291,19 @@ public class ModeController implements
     private void refreshBtn() {
         mBack.setEnabled(mRecordManager.canBack());
         mForward.setEnabled(mRecordManager.canForward());
+    }
+
+    private void disableBtn() {
+        mSave.setEnabled(false);
+        mShare.setEnabled(false);
+        mSave.setEnabled(false);
+        mShare.setEnabled(false);
+    }
+
+    private void resetBtn() {
+        mBack.setEnabled(mRecordManager.canBack());
+        mForward.setEnabled(mRecordManager.canForward());
+        mSave.setEnabled(true);
+        mShare.setEnabled(true);
     }
 }

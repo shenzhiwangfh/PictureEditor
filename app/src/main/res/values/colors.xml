@@ -27,4 +27,7 @@
     <color name="purple">#FFFF00FF</color>
     <color name="grey">#FF808080</color>
     <color name="black">#FF000000</color>
+
+    <color name="before_bg">#FF808080</color>
+    <color name="after_bg">#FFA0A0A0</color>
 </resources>

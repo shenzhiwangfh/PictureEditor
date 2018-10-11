@@ -1,24 +1,29 @@
 package com.nq.pictureeditor;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.nq.pictureeditor.control.ModeController;
+import com.nq.pictureeditor.task.LoadImageTask;
+import com.nq.pictureeditor.task.LoadListener;
 import com.nq.pictureeditor.view.ArcColorPicker;
 import com.nq.pictureeditor.view.ArcSeekBar;
 import com.nq.pictureeditor.view.CornerLayout;
 import com.nq.pictureeditor.view.DrawView;
 import com.nq.pictureeditor.view.OnShowListener;
 import com.nq.pictureeditor.view.Preview;
+import com.wang.avi.AVLoadingIndicatorView;
 
 public class DrawActivity extends AppCompatActivity
-        implements OnShowListener {
+        implements OnShowListener, LoadListener {
 
     public final static String TAG = "DrawActivity";
 
@@ -36,6 +41,7 @@ public class DrawActivity extends AppCompatActivity
     private ArcColorPicker mPenColorPicker;
     private ArcSeekBar mPenSeekBar;
     private ArcSeekBar mMosaicsSeekBar;
+    private AVLoadingIndicatorView mLoading;
 
     private ModeController mController;
 
@@ -44,8 +50,12 @@ public class DrawActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
 
-        //initActions();
-        initControllors();
+        mLoading = findViewById(R.id.loading);
+        mLoading.smoothToShow();
+
+        Intent intent = getIntent();
+        Uri mImageCaptureUri = intent.getData();
+        if (mImageCaptureUri != null) new LoadImageTask(this, this).execute(mImageCaptureUri);
 
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
     }
@@ -65,26 +75,10 @@ public class DrawActivity extends AppCompatActivity
     }
     */
 
-    /*
-    private void initActions() {
-        mSave = findViewById(R.id.save);
-        mShare = findViewById(R.id.share);
-        mBack = findViewById(R.id.back);
-        mForward = findViewById(R.id.forward);
-
-        mBack.setEnabled(false);
-        mForward.setEnabled(false);
-        mSave.setOnClickListener(this);
-        mShare.setOnClickListener(this);
-        mBack.setOnClickListener(this);
-        mForward.setOnClickListener(this);
-    }
-    */
-
-    private void initControllors() {
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
-        Bitmap mBitmap = bitmapDrawable.getBitmap();
-        mController = new ModeController(this, mBitmap);
+    private void initControllors(Bitmap bitmap) {
+        //BitmapDrawable bitmapDrawable = (BitmapDrawable) getDrawable(R.drawable.screenshot);
+        //Bitmap mBitmap = bitmapDrawable.getBitmap();
+        mController = new ModeController(this, bitmap);
 
         mDrawView = findViewById(R.id.main);
         mPreview = findViewById(R.id.preview);
@@ -111,5 +105,14 @@ public class DrawActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mController.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void setBitmap(Bitmap bitmap) {
+        if (bitmap != null) {
+            initControllors(bitmap);
+            mDrawView.invalidate();
+            mLoading.smoothToHide();
+        }
     }
 }

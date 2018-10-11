@@ -85,7 +85,7 @@ public class DrawView extends View implements ScaleGestureDetector.OnScaleGestur
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        draw.onDraw(canvas);
+        if(draw != null) draw.onDraw(canvas);
     }
 
     @Override
